@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f5f6fa; }
+
+    .sidebar {
+      width: 230px; min-height: 100vh;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e6fff 100%);
+      color: #fff; position: fixed; top: 0; left: 0;
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-logo { padding: 20px 20px 12px; font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .sidebar-menu { list-style: none; padding: 12px 0; margin: 0; flex: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; color: rgba(255,255,255,0.82);
+      text-decoration: none; font-size: 0.87rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active {
+      background: rgba(255,255,255,0.14); color: #fff;
+    }
+    .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+
+    .main-content { margin-left: 230px; min-height: 100vh; }
+
+    .topbar {
+      background: #fff; border-bottom: 1px solid #eaedf0;
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-weight: 700; font-size: 1rem; color: #1a202c; }
+
+    .kpi-card {
+      background: #fff; border-radius: 14px; padding: 20px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #eaedf0;
+    }
+    .kpi-card .kpi-label { font-size: 0.8rem; color: #718096; font-weight: 500; }
+    .kpi-card .kpi-value { font-size: 1.8rem; font-weight: 700; color: #1a202c; margin: 4px 0 2px; }
+    .kpi-card .kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+
+    .section-card {
+      background: #fff; border-radius: 14px; padding: 20px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #eaedf0; margin-bottom: 20px;
+    }
+    .section-card .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-card h6 { font-weight: 700; color: #1a202c; margin: 0; }
+
+    .table { font-size: 0.83rem; }
+    .table th { font-weight: 600; color: #4a5568; border-top: none; }
+    .table td { vertical-align: middle; }
+
+    /* Create Trip Form */
+    #createTripForm { display: none; background: #f8faff; border: 1px solid #dde6ff; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    #createTripForm .form-label { font-size: 0.82rem; font-weight: 600; color: #4a5568; }
+    #createTripForm .form-control, #createTripForm .form-select { font-size: 0.85rem; border-radius: 8px; }
+
+    .badge-admin { background: #fee2e2; color: #dc2626; }
+    .badge-user  { background: #e0e7ff; color: #4338ca; }
+
+    /* Inline route creation panel */
+    #newRoutePanel {
+      display: none;
+      background: #f0fff4;
+      border: 1.5px solid #86efac;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 10px;
+    }
+    #newRoutePanel .form-label { font-size: 0.8rem; font-weight: 600; color: #166534; }
+    #newRoutePanel .form-control { font-size: 0.85rem; border-radius: 8px; }
+
+    /* Delete confirm modal */
+    .del-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 9999;
+      align-items: center; justify-content: center;
+    }
+    .del-modal-overlay.open { display: flex; }
+    .del-modal {
+      background: #fff; border-radius: 16px;
+      padding: 28px 32px; max-width: 380px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: popIn 0.18s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .del-modal .icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .del-modal h6 { font-weight: 700; margin-bottom: 6px; }
+    .del-modal p  { font-size: 0.88rem; color: #718096; margin-bottom: 20px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🚌 BusBooking Admin</div>
+  <ul class="sidebar-menu">
+    <li><a href="#kpi" class="active">📊 Dashboard</a></li>
+    <li><a href="#users-section">👥 Người dùng</a></li>
+    <li><a href="#buses-section">🚌 Xe buýt</a></li>
+    <li><a href="#routes-section">📍 Tuyến đường</a></li>
+    <li><a href="#trips-section">🗺 Chuyến xe</a></li>
+    <li><a href="#tickets-section">🎫 Vé đặt</a></li>
+    <li><a href="#payments-section">💳 Thanh toán</a></li>
+    <li><a href="/">🌐 Trang chủ</a></li>
+  </ul>
+  <div class="sidebar-footer" id="sidebarUser">Đang tải...</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="topbar-title">Admin Dashboard</span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="themeToggleContainer"></span>
+      <span class="small text-muted" id="topbarUser"></span>
+      <button class="btn btn-outline-danger btn-sm" onclick="logout()">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="p-3 p-md-4">
+
+    <!-- Loading -->
+    <div id="loadingState" class="text-center py-5">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted">Đang tải dữ liệu...</p>
+    </div>
+
+    <div id="dashboardContent" style="display:none">
+
+      <!-- KPI -->
+      <div id="kpi" class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="kpi-card d-flex justify-content-between align-items-start">
+            <div><div class="kpi-label">Người dùng</div><div class="kpi-value" id="userCount">—</div></div>
+            <div class="kpi-icon" style="background:#eff3ff">👥</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card d-flex justify-content-between align-items-start">
+            <div><div class="kpi-label">Xe buýt</div><div class="kpi-value" id="busCount">—</div></div>
+            <div class="kpi-icon" style="background:#f0fff4">🚌</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card d-flex justify-content-between align-items-start">
+            <div><div class="kpi-label">Chuyến xe</div><div class="kpi-value" id="tripCount">—</div></div>
+            <div class="kpi-icon" style="background:#fff7ed">🗺</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card d-flex justify-content-between align-items-start">
+            <div><div class="kpi-label">Doanh thu hôm nay</div><div class="kpi-value" id="revenueToday" style="font-size:1.2rem">—</div></div>
+            <div class="kpi-icon" style="background:#fff0f0">💰</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+          <div class="section-card">
+            <h6 class="mb-3">📈 Đặt vé 30 ngày qua</h6>
+            <canvas id="bookingsChart" height="140"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="section-card">
+            <h6 class="mb-3">🗺 Chuyến theo tuyến</h6>
+            <canvas id="tripsChart" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="section-card" id="users-section">
+        <div class="section-header">
+          <h6>👥 Người dùng</h6>
+          <span class="badge bg-secondary" id="userBadge"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>#ID</th><th>Tài khoản</th><th>Email</th><th>Vai trò</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Delete User Confirm Modal -->
+      <div class="del-modal-overlay" id="delModalOverlay">
+        <div class="del-modal text-center">
+          <div class="icon">🗑️</div>
+          <h6>Xác nhận xóa người dùng</h6>
+          <p id="delModalMsg">Bạn có chắc muốn xóa người dùng này?<br>Hành động này <strong>không thể hoàn tác</strong>.</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-danger px-4" id="delConfirmBtn">
+              <span id="delSpinner" class="spinner-border spinner-border-sm me-1" style="display:none"></span>
+              Xóa
+            </button>
+            <button class="btn btn-outline-secondary px-4" onclick="closeDelModal()">Hủy</button>
+          </div>
+          <div id="delModalError" class="alert alert-danger mt-3 py-2 small" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- Buses -->
+      <div class="section-card" id="buses-section">
+        <div class="section-header">
+          <h6>🚌 Xe buýt</h6>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary" id="busBadge"></span>
+            <button class="btn btn-primary btn-sm px-3" onclick="toggleAddBusForm()">＋ Thêm xe</button>
+          </div>
+        </div>
+
+        <!-- Add Bus Form -->
+        <div id="addBusForm" style="display:none; background:#f8faff; border:1px solid #dde6ff;
+             border-radius:12px; padding:18px 20px; margin-bottom:16px;">
+          <h6 class="mb-3 text-primary">🚌 Thêm xe mới</h6>
+          <div id="busFormAlert" class="alert py-2 small mb-2" style="display:none"></div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Số xe (biển số / mã) *</label>
+              <input id="bf_number" class="form-control form-control-sm" placeholder="VD: FUTA-11">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Loại xe *</label>
+              <select id="bf_type" class="form-select form-select-sm">
+                <option value="">— Chọn loại —</option>
+                <option>Limousine 34 chỗ</option>
+                <option>Giường nằm 40 chỗ</option>
+                <option>Giường nằm VIP 36 chỗ</option>
+                <option>Ghế ngồi 45 chỗ</option>
+                <option>Xe giường nằm 22 chỗ</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Số ghế *</label>
+              <input id="bf_seats" type="number" class="form-control form-control-sm"
+                     placeholder="34" min="1" max="60">
+            </div>
+          </div>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-primary btn-sm" onclick="submitAddBus()">
+              <span id="busFormSpinner" class="spinner-border spinner-border-sm me-1" style="display:none"></span>
+              Lưu xe
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="toggleAddBusForm()">Hủy</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#ID</th>
+                <th>Số xe</th>
+                <th>Loại xe</th>
+                <th>Tổng ghế</th>
+                <th>Chuyến đang dùng</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="busesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Routes Section -->
+      <div class="section-card" id="routes-section">
+        <div class="section-header">
+          <h6>📍 Tuyến đường</h6>
+          <button class="btn btn-success btn-sm px-3" onclick="toggleNewRouteSection()">
+            ＋ Thêm tuyến mới
+          </button>
+        </div>
+
+        <!-- Create Route Form (full section) -->
+        <div id="createRouteSection" style="display:none; background:#f0fff4; border:1.5px solid #86efac; border-radius:12px; padding:18px 20px; margin-bottom:16px;">
+          <h6 class="text-success mb-3">📍 Thêm tuyến đường mới</h6>
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534">Điểm đi *</label>
+              <input id="rs_origin" class="form-control form-control-sm" placeholder="TP. Hồ Chí Minh">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534">Điểm đến *</label>
+              <input id="rs_destination" class="form-control form-control-sm" placeholder="Đà Lạt">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534">Khoảng cách (km)</label>
+              <input id="rs_distance" type="number" class="form-control form-control-sm" placeholder="300" min="1">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+              <button class="btn btn-success btn-sm w-100" onclick="submitCreateRoute('section')">
+                <span id="rsSpinner" class="spinner-border spinner-border-sm me-1" style="display:none"></span>
+                Tạo tuyến
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="toggleNewRouteSection()">✕</button>
+            </div>
+          </div>
+          <div id="rsAlert" class="mt-2" style="display:none"></div>
+        </div>
+
+        <!-- Routes Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>#ID</th><th>Điểm đi</th><th>Điểm đến</th><th>Khoảng cách</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody id="routesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Trips + Create Form -->
+      <div class="section-card" id="trips-section">
+        <div class="section-header">
+          <h6>🗺 Chuyến xe</h6>
+          <button class="btn btn-primary btn-sm px-3" onclick="toggleCreateTripForm()">
+            ＋ Tạo chuyến mới
+          </button>
+        </div>
+
+        <!-- Create Trip Form -->
+        <div id="createTripForm">
+          <h6 class="mb-3 text-primary">✏️ Thêm chuyến xe mới</h6>
+          <div class="row g-3">
+            <!-- Route dropdown + inline create -->
+            <div class="col-md-6">
+              <label class="form-label">Tuyến đường *</label>
+              <div class="d-flex gap-2">
+                <select id="f_routeId" class="form-select flex-grow-1">
+                  <option value="">— Chọn tuyến —</option>
+                </select>
+                <button type="button" class="btn btn-outline-success btn-sm px-2 text-nowrap"
+                        onclick="toggleNewRoutePanel()" title="Tạo tuyến mới">
+                  ＋ Tuyến mới
+                </button>
+              </div>
+
+              <!-- Inline quick create route -->
+              <div id="newRoutePanel">
+                <div class="fw-semibold mb-2" style="font-size:.82rem;color:#166534">📍 Tạo tuyến nhanh</div>
+                <div class="row g-2">
+                  <div class="col-5">
+                    <label class="form-label">Điểm đi *</label>
+                    <input id="nr_origin" class="form-control form-control-sm" placeholder="TP. Hồ Chí Minh">
+                  </div>
+                  <div class="col-5">
+                    <label class="form-label">Điểm đến *</label>
+                    <input id="nr_destination" class="form-control form-control-sm" placeholder="Đà Lạt">
+                  </div>
+                  <div class="col-2">
+                    <label class="form-label">KM</label>
+                    <input id="nr_distance" type="number" class="form-control form-control-sm" placeholder="300" min="1">
+                  </div>
+                </div>
+                <div id="nrAlert" class="mt-1" style="display:none"></div>
+                <div class="mt-2 d-flex gap-2">
+                  <button class="btn btn-success btn-sm" onclick="submitCreateRoute('inline')">
+                    <span id="nrSpinner" class="spinner-border spinner-border-sm me-1" style="display:none"></span>
+                    Tạo &amp; chọn tuyến
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" onclick="toggleNewRoutePanel()">Hủy</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Xe *</label>
+              <select id="f_busId" class="form-select">
+                <option value="">— Chọn xe —</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Ngày &amp; Giờ khởi hành *</label>
+              <input type="datetime-local" id="f_departureTime" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Giá vé (VND) *</label>
+              <input type="number" id="f_price" class="form-control" placeholder="300000" min="1000" step="1000">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Số ghế</label>
+              <input type="number" id="f_seatCount" class="form-control" placeholder="Mặc định theo xe" min="1" max="100">
+              <div class="form-text">Bỏ trống = dùng số ghế của xe</div>
+            </div>
+          </div>
+          <div id="tripFormAlert" class="mt-3" style="display:none"></div>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-success px-4" onclick="submitCreateTrip()">
+              <span id="tripSubmitSpinner" class="spinner-border spinner-border-sm me-1" style="display:none"></span>
+              Tạo chuyến
+            </button>
+            <button class="btn btn-outline-secondary" onclick="toggleCreateTripForm()">Hủy</button>
+          </div>
+        </div>
+
+        <!-- Trips Table -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>#ID</th><th>Tuyến</th><th>Xe</th><th>Loại xe</th><th>Khởi hành</th><th>Giá</th><th>Trạng thái</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody id="tripsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tickets -->
+      <div class="section-card" id="tickets-section">
+        <div class="section-header">
+          <h6>🎫 Vé đặt</h6>
+          <span class="badge bg-secondary" id="ticketBadge"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>#ID</th><th>Ghế</th><th>Tuyến</th><th>Khách hàng</th><th>Giá vé</th></tr>
+            </thead>
+            <tbody id="ticketsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payments -->
+      <div class="section-card" id="payments-section">
+        <div class="section-header">
+          <h6>💳 Thanh toán</h6>
+          <span class="badge bg-secondary" id="paymentBadge"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>#ID</th><th>Vé #</th><th>Phương thức</th><th>Trạng thái</th><th>Số tiền</th></tr>
+            </thead>
+            <tbody id="paymentsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dashboardContent -->
+  </div>
+</div>
+
+<script src="/js/theme.js"></script>
+<script>
+  const API = "http://localhost:8080/api"
+
+// ---- Auth helpers ----
+function authHeader() {
+  return { "Authorization": "Bearer " + (localStorage.getItem("token") || "") }
+}
+function authJson() {
+  return { ...authHeader(), "Content-Type": "application/json" }
+}
+
+// ---- Logout ----
+function logout() {
+  ["token","userId","username","role"].forEach(k => localStorage.removeItem(k))
+  window.location = "/"
+}
+
+// ---- Sidebar / topbar username ----
+const _username = localStorage.getItem("username") || "Admin"
+document.getElementById("sidebarUser").innerText = "Xin chào, " + _username
+document.getElementById("topbarUser").innerText = _username
+
+// ---- Date helpers ----
+function formatDt(raw) {
+  if (!raw) return "—"
+  try {
+    const v = Array.isArray(raw)
+      ? new Date(raw[0], raw[1]-1, raw[2], raw[3]||0, raw[4]||0)
+      : new Date(raw)
+    return v.toLocaleString("vi-VN", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })
+  } catch { return raw }
+}
+
+// ---- Routes section ----
+function toggleNewRouteSection() {
+  const el = document.getElementById("createRouteSection")
+  el.style.display = el.style.display === "none" ? "block" : "none"
+  if (el.style.display === "block") {
+    document.getElementById("rs_origin").focus()
+    document.getElementById("rsAlert").style.display = "none"
+  }
+}
+
+// ---- Inline route panel (inside trip form) ----
+function toggleNewRoutePanel() {
+  const panel = document.getElementById("newRoutePanel")
+  panel.style.display = panel.style.display === "none" ? "block" : "none"
+  if (panel.style.display === "block") {
+    document.getElementById("nr_origin").focus()
+    document.getElementById("nrAlert").style.display = "none"
+  }
+}
+
+// ---- Create route (shared, mode = "inline" | "section") ----
+async function submitCreateRoute(mode) {
+  const isInline = mode === "inline"
+
+  const originEl   = document.getElementById(isInline ? "nr_origin"      : "rs_origin")
+  const destEl     = document.getElementById(isInline ? "nr_destination" : "rs_destination")
+  const distEl     = document.getElementById(isInline ? "nr_distance"    : "rs_distance")
+  const alertEl    = document.getElementById(isInline ? "nrAlert"        : "rsAlert")
+  const spinnerEl  = document.getElementById(isInline ? "nrSpinner"      : "rsSpinner")
+
+  const origin      = originEl.value.trim()
+  const destination = destEl.value.trim()
+  const distance    = Number(distEl.value) || 0
+
+  if (!origin || !destination) {
+    alertEl.style.display = "block"
+    alertEl.className = "alert alert-warning py-1 small"
+    alertEl.innerText = "Vui lòng nhập điểm đi và điểm đến."
+    return
+  }
+
+  spinnerEl.style.display = "inline-block"
+  alertEl.style.display   = "none"
+
+  try {
+    const res = await fetch(`${API}/routes`, {
+      method: "POST",
+      headers: authJson(),
+      body: JSON.stringify({ origin, destination, distance })
+    })
+    const text = await res.text()
+    let payload = null
+    try { payload = JSON.parse(text) } catch(e) {}
+
+    if (!res.ok) {
+      alertEl.style.display = "block"
+      alertEl.className = "alert alert-danger py-1 small"
+      alertEl.innerText = (payload && payload.message) || "Tạo tuyến thất bại."
+      return
+    }
+
+    // Success
+    alertEl.style.display = "block"
+    alertEl.className = "alert alert-success py-1 small"
+    alertEl.innerText = `✅ Đã tạo tuyến: ${payload.origin} → ${payload.destination} (ID #${payload.id})`
+
+    // Clear fields
+    originEl.value = ""; destEl.value = ""; distEl.value = ""
+
+    // Refresh routes table
+    await refreshRoutes()
+
+    if (isInline) {
+      // Auto-select new route in dropdown and close panel
+      await refreshRouteDropdown(payload.id)
+      setTimeout(() => {
+        document.getElementById("newRoutePanel").style.display = "none"
+        alertEl.style.display = "none"
+      }, 1200)
+    }
+
+  } catch(err) {
+    alertEl.style.display = "block"
+    alertEl.className = "alert alert-danger py-1 small"
+    alertEl.innerText = "Lỗi kết nối: " + err.message
+  } finally {
+    spinnerEl.style.display = "none"
+  }
+}
+
+// ---- Render routes table ----
+function renderRoutes(routes) {
+  const tbody = document.getElementById("routesTable")
+  if (!tbody) return
+  if (!routes.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Chưa có tuyến nào.</td></tr>'
+    return
+  }
+  tbody.innerHTML = routes.map(r => `
+    <tr>
+      <td class="text-muted small">${r.id}</td>
+      <td><strong>${r.origin}</strong></td>
+      <td><strong>${r.destination}</strong></td>
+      <td class="text-muted">${r.distance > 0 ? r.distance + " km" : "—"}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger px-2 py-0"
+                onclick="deleteRoute(${r.id}, '${r.origin.replace(/'/g,"\\'")} → ${r.destination.replace(/'/g,"\\'")}')">
+          🗑 Xóa
+        </button>
+      </td>
+    </tr>
+  `).join("")
+}
+
+// ---- Delete route ----
+async function deleteRoute(id, label) {
+  if (!confirm(`Xóa tuyến "${label}"?\nLưu ý: không thể xóa nếu có chuyến đang dùng tuyến này.`)) return
+  try {
+    const res = await fetch(`${API}/routes/${id}`, { method: "DELETE", headers: authHeader() })
+    const text = await res.text()
+    let payload = null; try { payload = JSON.parse(text) } catch(e) {}
+    if (!res.ok) { alert((payload && payload.message) || "Xóa thất bại"); return }
+    await refreshRoutes()
+    await refreshRouteDropdown()
+  } catch(e) { alert("Lỗi kết nối") }
+}
+
+// ---- Refresh routes ----
+async function refreshRoutes() {
+  try {
+    const routes = await fetch(`${API}/routes`, { headers: authHeader() }).then(r => r.json())
+    renderRoutes(routes)
+    return routes
+  } catch(e) { console.error(e); return [] }
+}
+
+// ---- Refresh route dropdown (in trip form) ----
+async function refreshRouteDropdown(selectId) {
+  try {
+    const routes = await fetch(`${API}/routes`, { headers: authHeader() }).then(r => r.json())
+    const sel = document.getElementById("f_routeId")
+    const currentVal = sel.value
+    sel.innerHTML = '<option value="">— Chọn tuyến —</option>'
+    routes.forEach(r => {
+      sel.innerHTML += `<option value="${r.id}">${r.origin} → ${r.destination}${r.distance > 0 ? " (" + r.distance + " km)" : ""}</option>`
+    })
+    // Auto-select newly created route
+    if (selectId) sel.value = selectId
+    else if (currentVal) sel.value = currentVal
+  } catch(e) { console.error(e) }
+}
+
+// ---- Toggle create-trip form ----
+let formOpen = false
+async function toggleCreateTripForm() {
+  formOpen = !formOpen
+  const form = document.getElementById("createTripForm")
+  form.style.display = formOpen ? "block" : "none"
+  if (formOpen) {
+    await loadFormDropdowns()
+    setDefaultDeparture()
+  }
+  document.getElementById("tripFormAlert").style.display = "none"
+}
+
+function setDefaultDeparture() {
+  const now = new Date()
+  now.setHours(now.getHours() + 2, 0, 0, 0)
+  const iso = now.toISOString().slice(0, 16)
+  document.getElementById("f_departureTime").value = iso
+}
+
+async function loadFormDropdowns() {
+  await refreshRouteDropdown()
+
+  // Buses
+  try {
+    const buses = await fetch(`${API}/buses`, { headers: authHeader() }).then(r => r.json())
+    const sel = document.getElementById("f_busId")
+    sel.innerHTML = '<option value="">— Chọn xe —</option>'
+    buses.forEach(b => {
+      sel.innerHTML += `<option value="${b.id}">${b.busNumber} · ${b.busType} (${b.totalSeats} ghế)</option>`
+    })
+    sel.onchange = () => {
+      const opt = sel.options[sel.selectedIndex]
+      const match = opt.text.match(/\((\d+) ghế\)/)
+      if (match) document.getElementById("f_seatCount").placeholder = `Mặc định: ${match[1]} ghế`
+    }
+  } catch(e) { console.error("Load buses error", e) }
+}
+
+function showTripAlert(msg, type = "danger") {
+  const el = document.getElementById("tripFormAlert")
+  el.style.display = "block"
+  el.className = `alert alert-${type} py-2 small`
+  el.innerText = msg
+}
+
+async function submitCreateTrip() {
+  const routeId      = document.getElementById("f_routeId").value
+  const busId        = document.getElementById("f_busId").value
+  const departureTime= document.getElementById("f_departureTime").value
+  const price        = Number(document.getElementById("f_price").value)
+  const seatCount    = Number(document.getElementById("f_seatCount").value) || 0
+
+  if (!routeId || !busId || !departureTime || !price) {
+    showTripAlert("Vui lòng điền đầy đủ: tuyến, xe, giờ khởi hành và giá vé.")
+    return
+  }
+
+  const spinner = document.getElementById("tripSubmitSpinner")
+  spinner.style.display = "inline-block"
+
+  try {
+    const res = await fetch(`${API}/trips`, {
+      method: "POST",
+      headers: authJson(),
+      body: JSON.stringify({
+        busId:         Number(busId),
+        routeId:       Number(routeId),
+        departureTime: departureTime,   // "2026-03-20T08:00"
+        price,
+        seatCount
+      })
+    })
+
+    const text = await res.text()
+    let payload = null
+    try { payload = JSON.parse(text) } catch(e) {}
+
+    if (!res.ok) {
+      showTripAlert((payload && payload.message) || text || "Tạo chuyến thất bại.")
+      return
+    }
+
+    showTripAlert(`✅ Tạo chuyến thành công! ID #${payload.id} · ${seatCount || "Mặc định"} ghế được tạo.`, "success")
+
+    // Reset form fields
+    document.getElementById("f_routeId").value = ""
+    document.getElementById("f_busId").value = ""
+    document.getElementById("f_price").value = ""
+    document.getElementById("f_seatCount").value = ""
+    setDefaultDeparture()
+
+    // Refresh trips table + KPI
+    await refreshTrips()
+
+  } catch(err) {
+    showTripAlert("Lỗi kết nối server: " + err.message)
+  } finally {
+    spinner.style.display = "none"
+  }
+}
+
+// ---- Refresh trips table after creation ----
+async function refreshTrips() {
+  try {
+    const trips = await fetch(`${API}/trips`, { headers: authHeader() }).then(r => r.json())
+    renderTripsTable(trips)
+    const el = document.getElementById("tripCount")
+    if (el) el.innerText = trips.length
+  } catch(e) { console.error(e) }
+}
+
+// ---- Delete trip ----
+async function deleteTrip(id) {
+  if (!confirm(`Xóa chuyến #${id}? Ghế liên quan cũng sẽ bị xóa.`)) return
+  try {
+    const res = await fetch(`${API}/trips/${id}`, { method: "DELETE", headers: authHeader() })
+    if (res.ok) await refreshTrips()
+    else alert("Xóa thất bại")
+  } catch(e) { alert("Lỗi kết nối") }
+}
+
+// ---- Trip status helper ----
+function tripStatusBadge(departureTime) {
+  if (!departureTime) return '<span class="badge bg-secondary">Không rõ</span>'
+  const raw = departureTime
+  let dep
+  if (Array.isArray(raw)) {
+    dep = new Date(raw[0], raw[1] - 1, raw[2], raw[3] || 0, raw[4] || 0)
+  } else {
+    dep = new Date(raw)
+  }
+  if (isNaN(dep)) return '<span class="badge bg-secondary">Không rõ</span>'
+
+  const now    = new Date()
+  const diffMs = dep - now
+  const diffH  = diffMs / 3600000   // hours
+
+  if (diffMs < 0) {
+    // Departed
+    return '<span class="badge" style="background:#fee2e2;color:#991b1b;font-size:.75rem;">🔴 Đã khởi hành</span>'
+  } else if (diffH <= 1) {
+    // Departing within 1 hour
+    return '<span class="badge" style="background:#fff7ed;color:#c2410c;font-size:.75rem;">🟠 Sắp khởi hành</span>'
+  } else if (diffH <= 6) {
+    // Departing within 6 hours
+    return '<span class="badge" style="background:#fefce8;color:#854d0e;font-size:.75rem;">🟡 Hôm nay</span>'
+  } else {
+    return '<span class="badge" style="background:#dcfce7;color:#166534;font-size:.75rem;">🟢 Chờ khởi hành</span>'
+  }
+}
+
+// ---- Renderers ----
+function renderTripsTable(trips) {
+  const tbody = document.getElementById("tripsTable")
+  if (!tbody) return
+  if (!trips.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-muted text-center py-3">Chưa có chuyến nào.</td></tr>'; return }
+  tbody.innerHTML = trips.map(t => `
+    <tr>
+      <td class="text-muted small">${t.id}</td>
+      <td><span class="fw-semibold">${t.route.origin}</span><span class="text-muted"> → </span><span class="fw-semibold">${t.route.destination}</span></td>
+      <td>${t.bus.busNumber}</td>
+      <td><span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:500">${t.bus.busType}</span></td>
+      <td>${formatDt(t.departureTime)}</td>
+      <td class="fw-semibold text-warning">${Number(t.price).toLocaleString("vi-VN")} đ</td>
+      <td>${tripStatusBadge(t.departureTime)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteTrip(${t.id})" title="Xóa chuyến">🗑</button>
+      </td>
+    </tr>
+  `).join("")
+}
+
+// ---- Auto-refresh trips badges every 60 seconds ----
+setInterval(async () => {
+  try {
+    const trips = await fetch(`${API}/trips`, { headers: authHeader() }).then(r => r.json())
+    if (Array.isArray(trips)) renderTripsTable(trips)
+  } catch (e) { /* silent — don't disrupt UI */ }
+}, 60_000)
+
+// Track current logged-in userId to prevent self-delete
+const _myUserId = Number(localStorage.getItem("userId"))
+
+function renderUsers(users) {
+  const tbody = document.getElementById("usersTable")
+  const badge = document.getElementById("userBadge")
+  if (badge) badge.innerText = users.length + " người"
+  if (!tbody) return
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Không có người dùng.</td></tr>'
+    return
+  }
+  tbody.innerHTML = users.map(u => {
+    const isMe    = u.id === _myUserId
+    const isAdmin = u.role === "ROLE_ADMIN"
+    const roleBadge = isAdmin
+      ? '<span class="badge bg-danger">ADMIN</span>'
+      : '<span class="badge" style="background:#e0e7ff;color:#4338ca">USER</span>'
+    const actionBtn = isMe
+      ? '<span class="text-muted small" title="Không thể xóa chính mình">—</span>'
+      : `<button class="btn btn-sm btn-outline-danger px-2 py-0"
+           onclick="openDelModal(${u.id}, '${(u.username||"?").replace(/'/g,"\\'")}', ${isAdmin})"
+           title="Xóa người dùng">🗑 Xóa</button>`
+    return `
+      <tr>
+        <td class="text-muted small">${u.id}</td>
+        <td>
+          <strong>${u.username || "—"}</strong>
+          ${isMe ? '<span class="badge bg-secondary ms-1" style="font-size:.65rem">Bạn</span>' : ""}
+        </td>
+        <td class="text-muted small">${u.email || "—"}</td>
+        <td>${roleBadge}</td>
+        <td>${actionBtn}</td>
+      </tr>`
+  }).join("")
+}
+
+// ---- Delete modal logic ----
+let _pendingDeleteId   = null
+let _pendingDeleteName = ""
+
+function openDelModal(userId, username, isAdmin) {
+  _pendingDeleteId   = userId
+  _pendingDeleteName = username
+  const msg = document.getElementById("delModalMsg")
+  msg.innerHTML = isAdmin
+    ? `⚠️ <strong>${username}</strong> là tài khoản <span class="text-danger fw-bold">ADMIN</span>.<br>Bạn có chắc muốn xóa? Hành động này <strong>không thể hoàn tác</strong>.`
+    : `Bạn có chắc muốn xóa tài khoản <strong>${username}</strong>?<br>Hành động này <strong>không thể hoàn tác</strong>.`
+  document.getElementById("delModalError").style.display = "none"
+  document.getElementById("delModalOverlay").classList.add("open")
+
+  document.getElementById("delConfirmBtn").onclick = confirmDeleteUser
+}
+
+function closeDelModal() {
+  document.getElementById("delModalOverlay").classList.remove("open")
+  _pendingDeleteId = null
+}
+
+async function confirmDeleteUser() {
+  if (!_pendingDeleteId) return
+  const spinner = document.getElementById("delSpinner")
+  const errEl   = document.getElementById("delModalError")
+  spinner.style.display = "inline-block"
+  errEl.style.display   = "none"
+
+  try {
+    const res = await fetch(`${API}/users/${_pendingDeleteId}`, {
+      method: "DELETE",
+      headers: authHeader()
+    })
+    const text = await res.text()
+    let payload = null
+    try { payload = JSON.parse(text) } catch(e) {}
+
+    if (!res.ok) {
+      errEl.style.display = "block"
+      errEl.innerText = (payload && payload.message) || "Xóa thất bại."
+      return
+    }
+
+    // Success → close modal, refresh user list + KPI
+    closeDelModal()
+    await refreshUsers()
+
+  } catch(err) {
+    errEl.style.display = "block"
+    errEl.innerText = "Lỗi kết nối: " + err.message
+  } finally {
+    spinner.style.display = "none"
+  }
+}
+
+async function refreshUsers() {
+  try {
+    const users = await fetch(`${API}/users`, { headers: authHeader() }).then(r => r.json())
+    renderUsers(users)
+    const el = document.getElementById("userCount")
+    if (el) el.innerText = users.length
+    const badge = document.getElementById("userBadge")
+    if (badge) badge.innerText = users.length + " người"
+  } catch(e) { console.error(e) }
+}
+
+// Close modal on overlay click
+document.getElementById("delModalOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeDelModal()
+})
+
+// ---- Bus type icon helper ----
+function busTypeIcon(type) {
+  if (!type) return '🚌'
+  const t = type.toLowerCase()
+  if (t.includes('vip'))      return '⭐'
+  if (t.includes('giường'))   return '🛏️'
+  if (t.includes('limousine')) return '🚐'
+  return '🚌'
+}
+
+// ---- Cached trip counts per bus (loaded once on dashboard init) ----
+let _busTripCounts = {}
+
+async function loadBusTripCounts(buses) {
+  const results = await Promise.allSettled(
+    buses.map(b =>
+      fetch(`${API}/buses/${b.id}/trip-count`, { headers: authHeader() })
+        .then(r => r.json())
+        .then(d => ({ busId: b.id, count: d.tripCount || 0 }))
+    )
+  )
+  _busTripCounts = {}
+  results.forEach(r => {
+    if (r.status === 'fulfilled') _busTripCounts[r.value.busId] = r.value.count
+  })
+}
+
+function renderBuses(buses) {
+  const tbody = document.getElementById("busesTable")
+  const badge = document.getElementById("busBadge")
+  if (badge) badge.innerText = buses.length + " xe"
+  if (!tbody) return
+  if (!buses.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">Chưa có xe nào.</td></tr>'
+    return
+  }
+  tbody.innerHTML = buses.map(b => {
+    const tripCount = _busTripCounts[b.id] ?? '—'
+    const tripBadge = typeof tripCount === 'number'
+      ? (tripCount > 0
+          ? `<span class="badge" style="background:#dbeafe;color:#1d4ed8">${tripCount} chuyến</span>`
+          : `<span class="badge bg-light text-muted border">Chưa dùng</span>`)
+      : `<span class="text-muted small">—</span>`
+
+    return `
+    <tr>
+      <td class="text-muted small">${b.id}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <span style="font-size:1.2rem">${busTypeIcon(b.busType)}</span>
+          <strong>${b.busNumber}</strong>
+        </div>
+      </td>
+      <td><span class="badge" style="background:#e0e7ff;color:#3730a3;font-weight:500">${b.busType || '—'}</span></td>
+      <td>
+        <div class="d-flex align-items-center gap-1">
+          <span class="badge bg-light text-dark border">${b.totalSeats}</span>
+          <span class="text-muted small">ghế</span>
+        </div>
+      </td>
+      <td>${tripBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteBusById(${b.id}, '${b.busNumber}')"
+                title="Xóa xe">🗑</button>
+      </td>
+    </tr>`
+  }).join("")
+}
+
+// ---- Toggle add bus form ----
+let _addBusFormOpen = false
+function toggleAddBusForm() {
+  _addBusFormOpen = !_addBusFormOpen
+  document.getElementById("addBusForm").style.display = _addBusFormOpen ? "block" : "none"
+  if (_addBusFormOpen) {
+    document.getElementById("bf_number").focus()
+    document.getElementById("busFormAlert").style.display = "none"
+  }
+}
+
+function showBusAlert(msg, type = "danger") {
+  const el = document.getElementById("busFormAlert")
+  el.className = `alert alert-${type} py-2 small mb-2`
+  el.innerText  = msg
+  el.style.display = "block"
+}
+
+async function submitAddBus() {
+  const number = document.getElementById("bf_number").value.trim()
+  const type   = document.getElementById("bf_type").value.trim()
+  const seats  = parseInt(document.getElementById("bf_seats").value)
+
+  if (!number) { showBusAlert("Vui lòng nhập số xe / mã xe."); return }
+  if (!type)   { showBusAlert("Vui lòng chọn loại xe."); return }
+  if (!seats || seats <= 0) { showBusAlert("Số ghế phải lớn hơn 0."); return }
+
+  const spinner = document.getElementById("busFormSpinner")
+  spinner.style.display = "inline-block"
+
+  try {
+    const res  = await fetch(`${API}/buses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeader() },
+      body: JSON.stringify({ busNumber: number, busType: type, totalSeats: seats })
+    })
+    const data = await res.json()
+    if (!res.ok) { showBusAlert(data.message || "Thêm xe thất bại."); return }
+
+    showBusAlert("✅ Đã thêm xe " + number + " thành công!", "success")
+    document.getElementById("bf_number").value = ""
+    document.getElementById("bf_type").value   = ""
+    document.getElementById("bf_seats").value  = ""
+
+    // Refresh buses table + dropdown in trip form
+    const buses = await fetch(`${API}/buses`, { headers: authHeader() }).then(r => r.json())
+    await loadBusTripCounts(buses)
+    renderBuses(buses)
+    populateBusDropdown(buses)
+    const busCountEl = document.getElementById("busCount")
+    if (busCountEl) busCountEl.innerText = buses.length
+
+  } catch (e) {
+    showBusAlert("Lỗi kết nối server.")
+  } finally {
+    spinner.style.display = "none"
+  }
+}
+
+async function deleteBusById(id, busNumber) {
+  if (!confirm(`Xóa xe "${busNumber}" (#${id})?\nKhông thể xóa nếu xe đang có chuyến.`)) return
+  try {
+    const res  = await fetch(`${API}/buses/${id}`, { method: "DELETE", headers: authHeader() })
+    const data = await res.json()
+    if (!res.ok) { alert(data.message || "Xóa thất bại."); return }
+
+    const buses = await fetch(`${API}/buses`, { headers: authHeader() }).then(r => r.json())
+    await loadBusTripCounts(buses)
+    renderBuses(buses)
+    populateBusDropdown(buses)
+    const busCountEl = document.getElementById("busCount")
+    if (busCountEl) busCountEl.innerText = buses.length
+  } catch (e) {
+    alert("Lỗi kết nối server.")
+  }
+}
+
+function populateBusDropdown(buses) {
+  const sel = document.getElementById("f_busId")
+  if (!sel) return
+  const cur = sel.value
+  sel.innerHTML = '<option value="">— Chọn xe —</option>' +
+    buses.map(b => `<option value="${b.id}" ${b.id == cur ? "selected" : ""}>${b.busNumber} · ${b.busType} (${b.totalSeats} ghế)</option>`).join("")
+}
+
+function renderTickets(tickets) {
+  const tbody = document.getElementById("ticketsTable")
+  const badge = document.getElementById("ticketBadge")
+  if (badge) badge.innerText = tickets.length + " vé"
+  if (!tbody) return
+  if (!tickets.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">Chưa có vé nào.</td></tr>'; return }
+  tbody.innerHTML = tickets.map(t => `
+    <tr>
+      <td class="text-muted small">${t.id}</td>
+      <td><strong>${t.seat?.seatNumber || "—"}</strong></td>
+      <td class="text-muted small">${t.trip ? t.trip.route?.origin + " → " + t.trip.route?.destination : "—"}</td>
+      <td>${t.user?.username || "—"}</td>
+      <td class="fw-semibold text-warning">${Number(t.price || 0).toLocaleString("vi-VN")} đ</td>
+    </tr>
+  `).join("")
+}
+
+const METHOD_LABELS = {
+  CREDIT_CARD:   '💳 Thẻ tín dụng',
+  CASH:          '💵 Tiền mặt',
+  BANK_TRANSFER: '🏦 Chuyển khoản',
+  E_WALLET:      '📱 Ví điện tử'
+}
+
+function paymentStatusBadge(status, method) {
+  if (status === 'PENDING' || (status !== 'SUCCESS' && method === 'CASH')) {
+    return '<span class="badge" style="background:#fff3cd;color:#856404;font-size:.78rem;">⏳ Chờ thu tiền mặt</span>'
+  }
+  if (status === 'SUCCESS') {
+    return '<span class="badge" style="background:#dcfce7;color:#166534;font-size:.78rem;">✅ Đã thanh toán</span>'
+  }
+  return `<span class="badge bg-secondary" style="font-size:.78rem;">${status}</span>`
+}
+
+function renderPayments(payments) {
+  const tbody = document.getElementById("paymentsTable")
+  const badge = document.getElementById("paymentBadge")
+  if (badge) badge.innerText = payments.length + " giao dịch"
+  if (!tbody) return
+  if (!payments.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">Chưa có thanh toán nào.</td></tr>'; return }
+  tbody.innerHTML = payments.map(p => `
+    <tr>
+      <td class="text-muted small">${p.id}</td>
+      <td class="text-muted">#${p.ticketId != null ? p.ticketId : "—"}</td>
+      <td>${METHOD_LABELS[p.paymentMethod] || p.paymentMethod || "—"}</td>
+      <td>${paymentStatusBadge(p.status, p.paymentMethod)}</td>
+      <td class="fw-semibold">${Number(p.amount).toLocaleString("vi-VN")} đ</td>
+    </tr>
+  `).join("")
+}
+
+function renderBookingsChart(data) {
+  const ctx = document.getElementById("bookingsChart")
+  if (!ctx) return
+  if (!Array.isArray(data) || !data.length) return
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map(d => d.date),
+      datasets: [{ label: "Vé đặt", data: data.map(d => d.count ?? d.bookings ?? 0), fill: true, borderColor: "#1e6fff", backgroundColor: "rgba(30,111,255,0.08)", tension: 0.4, pointRadius: 3 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  })
+}
+
+function renderTripsChart(data) {
+  const ctx = document.getElementById("tripsChart")
+  if (!ctx) return
+  if (!Array.isArray(data) || !data.length) return
+  const colors = ["#1e6fff","#ff6b00","#2ecc71","#e74c3c","#f1c40f","#9b59b6","#1abc9c","#e67e22"]
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: data.map(d => d.route || `${d.origin || "—"} → ${d.destination || "—"}`),
+      datasets: [{ data: data.map(d => d.trips ?? d.tripCount ?? 0), backgroundColor: colors.slice(0, data.length), borderWidth: 2 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } } } }
+  })
+}
+
+// ---- Main load ----
+async function loadDashboard() {
+  const token = localStorage.getItem("token")
+  const role  = localStorage.getItem("role")
+  if (!token || role !== "ROLE_ADMIN") {
+    alert("Bạn không có quyền truy cập trang này.")
+    window.location = "/login"
+    return
+  }
+
+  const get = async (path) => {
+    const res = await fetch(`${API}${path}`, { headers: authHeader() })
+    if (!res.ok) throw new Error(path + " → " + res.status)
+    return res.json()
+  }
+
+  const [users, buses, routes, trips, tickets, payments, rev, bookings30, tripStats] =
+    await Promise.allSettled([
+      get("/users"), get("/buses"), get("/routes"), get("/trips"),
+      get("/admin/tickets"), get("/payments"),
+      get("/admin/revenue/today"),
+      get("/admin/bookings/last30days"),
+      get("/admin/trips/statistics")
+    ])
+
+  const ok = p => p.status === "fulfilled" ? p.value : []
+
+  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v }
+  setEl("userCount",  ok(users).length)
+  setEl("busCount",   ok(buses).length)
+  setEl("tripCount",  ok(trips).length)
+
+  const revVal = rev.status === "fulfilled" ? rev.value?.revenue : null
+  setEl("revenueToday", revVal != null ? Number(revVal).toLocaleString("vi-VN") + " đ" : "—")
+
+  renderUsers(ok(users))
+  await loadBusTripCounts(ok(buses))
+  renderBuses(ok(buses))
+  renderRoutes(ok(routes))
+  renderTripsTable(ok(trips))
+  if (tickets.status === "rejected") {
+    const tbody = document.getElementById("ticketsTable")
+    const badge = document.getElementById("ticketBadge")
+    if (badge) badge.innerText = "lỗi"
+    if (tbody) {
+      const msg = (tickets.reason && tickets.reason.message) ? tickets.reason.message : "Không tải được"
+      tbody.innerHTML = `<tr><td colspan="5" class="text-danger small py-3">⚠ ${msg}. Đăng nhập lại hoặc kiểm tra backend (GET /api/admin/tickets).</td></tr>`
+    }
+  } else {
+    renderTickets(ok(tickets))
+  }
+  renderPayments(ok(payments))
+
+  if (bookings30.status === "fulfilled") renderBookingsChart(bookings30.value)
+  if (tripStats.status  === "fulfilled") renderTripsChart(tripStats.value)
+
+  document.getElementById("loadingState").style.display = "none"
+  document.getElementById("dashboardContent").style.display = "block"
+}
+
+loadDashboard()
+</script>
+</body>
+</html>

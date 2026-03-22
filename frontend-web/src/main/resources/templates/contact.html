@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Liên hệ – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-hero { background: linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:56px 0 40px; }
+    .contact-card { border:none; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.08);
+                    transition:transform .2s; }
+    .contact-card:hover { transform:translateY(-4px); }
+    .contact-icon { font-size:2.5rem; margin-bottom:12px; }
+    .form-control:focus { border-color:#2a5298; box-shadow:0 0 0 3px rgba(42,82,152,.15); }
+    .btn-send { background:linear-gradient(135deg,#1e3c72,#2a5298); border:none; }
+    .btn-send:hover { opacity:.9; }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="/" class="btn btn-outline-secondary btn-sm">← Trang chủ</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero text-center">
+  <div class="container">
+    <div style="font-size:3rem;margin-bottom:10px;">📞</div>
+    <h1 class="fw-bold mb-2">Liên hệ với chúng tôi</h1>
+    <p class="opacity-75 mb-0">Chúng tôi luôn sẵn sàng hỗ trợ bạn 7 ngày / tuần</p>
+  </div>
+</div>
+
+<main class="container py-5">
+
+  <!-- Contact info cards -->
+  <div class="row g-4 mb-5 justify-content-center">
+    <div class="col-md-4">
+      <div class="card contact-card p-4 text-center h-100">
+        <div class="contact-icon">📞</div>
+        <h6 class="fw-bold mb-1">Hotline</h6>
+        <p class="text-muted small mb-2">Hỗ trợ 8:00 – 22:00 hàng ngày</p>
+        <a href="tel:0949355101" class="fs-5 fw-bold text-primary text-decoration-none">0949 355 101</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card contact-card p-4 text-center h-100">
+        <div class="contact-icon">✉️</div>
+        <h6 class="fw-bold mb-1">Email hỗ trợ</h6>
+        <p class="text-muted small mb-2">Phản hồi trong vòng 2–4 giờ</p>
+        <a href="mailto:thphuc813@gmail.com" class="fw-semibold text-primary text-decoration-none" style="word-break:break-all;">
+          thphuc813@gmail.com
+        </a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card contact-card p-4 text-center h-100">
+        <div class="contact-icon">📍</div>
+        <h6 class="fw-bold mb-1">Văn phòng</h6>
+        <p class="text-muted small mb-2">Ghé thăm chúng tôi</p>
+        <span class="fw-semibold">TP. Hồ Chí Minh,<br>Việt Nam</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact form -->
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5">
+          <h4 class="fw-bold mb-1">Gửi tin nhắn cho chúng tôi</h4>
+          <p class="text-muted small mb-4">Điền thông tin bên dưới, chúng tôi sẽ liên hệ lại sớm nhất.</p>
+
+          <div id="formAlert" class="alert py-2 small" style="display:none"></div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Họ tên <span class="text-danger">*</span></label>
+              <input id="cName" class="form-control" placeholder="Nguyễn Văn A">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Số điện thoại</label>
+              <input id="cPhone" class="form-control" placeholder="0909 xxx xxx" type="tel">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+              <input id="cEmail" class="form-control" placeholder="email@example.com" type="email">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Chủ đề</label>
+              <select id="cTopic" class="form-select">
+                <option value="">-- Chọn chủ đề --</option>
+                <option>Hỏi về đặt vé</option>
+                <option>Hoàn / đổi vé</option>
+                <option>Khiếu nại chuyến đi</option>
+                <option>Thanh toán & hoàn tiền</option>
+                <option>Tài khoản & đăng nhập</option>
+                <option>Khác</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Nội dung <span class="text-danger">*</span></label>
+              <textarea id="cMsg" class="form-control" rows="5"
+                        placeholder="Mô tả chi tiết vấn đề của bạn..."></textarea>
+            </div>
+            <div class="col-12 mt-2">
+              <button class="btn btn-send btn-primary w-100 py-2 fw-semibold" onclick="sendContact()">
+                Gửi tin nhắn ✈
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side tips -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+      <div class="card border-0 rounded-4 p-4" style="background:#eef4ff;">
+        <h6 class="fw-bold mb-3">💡 Mẹo liên hệ nhanh</h6>
+        <ul class="list-unstyled small text-muted mb-0">
+          <li class="mb-2">📋 Cung cấp <strong>mã vé</strong> để được hỗ trợ nhanh hơn</li>
+          <li class="mb-2">🕐 Giờ hỗ trợ điện thoại: <strong>8:00 – 22:00</strong></li>
+          <li class="mb-2">📧 Email phản hồi trong <strong>2–4 giờ</strong></li>
+          <li>❓ Xem <a href="/faq" class="text-primary">câu hỏi thường gặp</a> để tìm đáp án ngay</li>
+        </ul>
+      </div>
+
+      <div class="card border-0 rounded-4 p-4 mt-3" style="background:#fff3cd;">
+        <h6 class="fw-bold mb-2">⚡ Liên hệ khẩn cấp</h6>
+        <p class="small text-muted mb-2">Chuyến xe sắp khởi hành hoặc gặp sự cố?</p>
+        <a href="tel:0949355101" class="btn btn-warning fw-bold w-100">
+          📞 Gọi ngay 0949 355 101
+        </a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:#1a1a2e;color:rgba(255,255,255,.6);padding:40px 0 20px;margin-top:60px;">
+  <div class="container text-center">
+    <div class="mb-2" style="color:#fff;font-weight:800;font-size:1.1rem;">🚌 BusBooking</div>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mb-3" style="font-size:.85rem;">
+      <a href="/faq" style="color:rgba(255,255,255,.6);text-decoration:none;">Câu hỏi thường gặp</a>
+      <a href="/contact" style="color:rgba(255,255,255,.6);text-decoration:none;">Liên hệ</a>
+      <a href="/refund-policy" style="color:rgba(255,255,255,.6);text-decoration:none;">Chính sách hoàn vé</a>
+      <a href="/about" style="color:rgba(255,255,255,.6);text-decoration:none;">Giới thiệu</a>
+      <a href="/terms" style="color:rgba(255,255,255,.6);text-decoration:none;">Điều khoản</a>
+      <a href="/privacy" style="color:rgba(255,255,255,.6);text-decoration:none;">Bảo mật</a>
+    </div>
+    <div style="font-size:.78rem;opacity:.4;">© 2026 BusBooking. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+<script>
+  function sendContact() {
+    const name  = document.getElementById("cName").value.trim()
+    const email = document.getElementById("cEmail").value.trim()
+    const msg   = document.getElementById("cMsg").value.trim()
+    const alert = document.getElementById("formAlert")
+
+    if (!name || !email || !msg) {
+      alert.className = "alert alert-danger py-2 small"
+      alert.innerText = "Vui lòng điền đầy đủ Họ tên, Email và Nội dung."
+      alert.style.display = "block"
+      return
+    }
+    // Simulate submission
+    alert.className = "alert alert-success py-2 small"
+    alert.innerHTML = "✅ <strong>Gửi thành công!</strong> Chúng tôi sẽ phản hồi sớm nhất qua email của bạn."
+    alert.style.display = "block"
+    document.getElementById("cName").value  = ""
+    document.getElementById("cPhone").value = ""
+    document.getElementById("cEmail").value = ""
+    document.getElementById("cMsg").value   = ""
+    document.getElementById("cTopic").value = ""
+    window.scrollTo({top: document.getElementById("formAlert").offsetTop - 80, behavior:"smooth"})
+  }
+</script>
+</body>
+</html>

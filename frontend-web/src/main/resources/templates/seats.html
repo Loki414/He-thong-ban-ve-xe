@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chọn ghế – BusBooking</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/seat.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="/trips" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4 pb-5">
+
+  <!-- Trip info banner -->
+  <div class="trip-info-banner">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <div class="route-text" id="bannerRoute">—</div>
+        <div class="meta mt-1" id="bannerMeta"></div>
+      </div>
+      <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <span class="price fs-5" id="bannerPrice"></span>
+        <span class="text-muted small"> / ghế</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Left: Bus seat layout -->
+    <div class="col-lg-7">
+      <h5 class="fw-bold mb-3">Sơ đồ ghế xe</h5>
+
+      <div class="bus-wrapper">
+        <div class="bus-layout">
+          <div class="driver">🧑‍✈️ Tài xế</div>
+          <div id="seatList">
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+              <span class="ms-2 small text-muted">Đang tải sơ đồ ghế...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="seat-legend">
+          <div class="legend-item">
+            <div class="legend-dot available"></div><span>Còn trống</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot selected"></div><span>Đang chọn</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot booked"></div><span>Đã đặt</span>
+          </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="lock-countdown" id="lockCountdown">
+          ⏳ Ghế được giữ trong: <strong id="countdownTimer">5:00</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Selection summary -->
+    <div class="col-lg-5">
+      <h5 class="fw-bold mb-3">Ghế đã chọn</h5>
+
+      <div class="summary-box mb-3">
+        <div class="row-item">
+          <span class="label">Tuyến đường</span>
+          <span class="val" id="sumRoute">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Khởi hành</span>
+          <span class="val" id="sumDep">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Loại xe</span>
+          <span class="val" id="sumBus">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Ghế đã chọn</span>
+          <span class="val text-warning fw-bold" id="sumSeat">Chưa chọn</span>
+        </div>
+        <div class="row-item total-row">
+          <span class="label">Giá vé</span>
+          <span class="val" id="sumPrice">—</span>
+        </div>
+      </div>
+
+      <div id="noSeatWarning" class="alert alert-warning small py-2" style="display:none">
+        Vui lòng chọn một ghế trước khi tiếp tục.
+      </div>
+      <div id="loginWarning" class="alert alert-info small py-2" style="display:none">
+        Bạn cần <a href="/login">đăng nhập</a> để giữ và đặt ghế.
+      </div>
+
+      <button class="btn btn-primary w-100 fw-semibold py-2"
+              id="continueBtn" onclick="goBooking()">
+        Tiếp tục đặt vé →
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/seats.js"></script>
+<script>
+  // Render trip info from localStorage
+  function formatDep(raw) {
+    if (!raw) return "—"
+    try {
+      const v = JSON.parse(raw)
+      const d = Array.isArray(v)
+        ? new Date(v[0], v[1]-1, v[2], v[3]||0, v[4]||0)
+        : new Date(v)
+      return d.toLocaleString("vi-VN", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      })
+    } catch (e) { return raw }
+  }
+
+  const origin  = localStorage.getItem("tripOrigin") || ""
+  const dest    = localStorage.getItem("tripDestination") || ""
+  const price   = Number(localStorage.getItem("tripPrice") || 0)
+  const bus     = `${localStorage.getItem("tripBusNumber") || ""} · ${localStorage.getItem("tripBusType") || ""}`
+  const dep     = formatDep(localStorage.getItem("tripDepartureTime"))
+  const route   = `${origin} → ${dest}`
+
+  document.getElementById("bannerRoute").innerText  = route || "—"
+  document.getElementById("bannerMeta").innerText   = `🚌 ${bus}  ·  ⏰ ${dep}`
+  document.getElementById("bannerPrice").innerText  = price ? price.toLocaleString("vi-VN") + " VND" : ""
+  document.getElementById("sumRoute").innerText     = route || "—"
+  document.getElementById("sumDep").innerText       = dep
+  document.getElementById("sumBus").innerText       = bus
+  document.getElementById("sumPrice").innerText     = price ? price.toLocaleString("vi-VN") + " VND" : "—"
+
+  // Show login warning if not logged in
+  if (!localStorage.getItem("token")) {
+    document.getElementById("loginWarning").style.display = "block"
+  }
+</script>
+
+</body>
+</html>

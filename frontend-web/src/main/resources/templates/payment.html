@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Thanh toán – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Progress steps -->
+<div class="bg-white border-bottom py-2">
+  <div class="container">
+    <div class="d-flex align-items-center gap-2 small text-muted">
+      <span>Tìm chuyến</span><span>›</span>
+      <span>Chọn ghế</span><span>›</span>
+      <span>Thông tin</span><span>›</span>
+      <span class="text-primary fw-semibold">Thanh toán</span><span>›</span>
+      <span>Xác nhận</span>
+    </div>
+  </div>
+</div>
+
+<main class="container py-4">
+  <div class="row g-4 justify-content-center">
+
+    <!-- Left: payment methods -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">💳 Chọn phương thức thanh toán</h5>
+
+          <div id="errMsg" class="alert alert-danger small py-2 mb-3" style="display:none"></div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <label class="method-card d-block border rounded-3 p-3 text-center" style="cursor:pointer">
+                <input type="radio" name="method" value="CREDIT_CARD" class="d-none" checked>
+                <div style="font-size:2rem">💳</div>
+                <div class="small fw-semibold mt-1">Thẻ tín dụng</div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="method-card d-block border rounded-3 p-3 text-center" style="cursor:pointer">
+                <input type="radio" name="method" value="CASH" class="d-none">
+                <div style="font-size:2rem">💵</div>
+                <div class="small fw-semibold mt-1">Tiền mặt</div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="method-card d-block border rounded-3 p-3 text-center" style="cursor:pointer">
+                <input type="radio" name="method" value="BANK_TRANSFER" class="d-none">
+                <div style="font-size:2rem">🏦</div>
+                <div class="small fw-semibold mt-1">Chuyển khoản</div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="method-card d-block border rounded-3 p-3 text-center" style="cursor:pointer">
+                <input type="radio" name="method" value="E_WALLET" class="d-none">
+                <div style="font-size:2rem">📱</div>
+                <div class="small fw-semibold mt-1">Ví điện tử</div>
+              </label>
+            </div>
+          </div>
+
+          <p class="text-muted small mb-4">
+            Phương thức đã chọn: <strong id="selectedMethodLabel">Thẻ tín dụng</strong>
+          </p>
+
+          <button class="btn btn-primary w-100 fw-semibold py-2" id="payBtn" onclick="doPayment()">
+            Thanh toán ngay →
+          </button>
+
+          <p class="text-muted text-center small mt-3 mb-0">
+            🔒 Giao dịch được mã hóa và mô phỏng an toàn.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: order summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 mb-3">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-3">📋 Đơn hàng</h6>
+          <div class="summary-box">
+            <div class="row-item">
+              <span class="label">Tuyến</span>
+              <span class="val" id="paymentRoute">—</span>
+            </div>
+            <div class="row-item">
+              <span class="label">Khởi hành</span>
+              <span class="val" id="paymentDeparture">—</span>
+            </div>
+            <div class="row-item">
+              <span class="label">Xe</span>
+              <span class="val" id="paymentBus">—</span>
+            </div>
+            <div class="row-item">
+              <span class="label">Ghế</span>
+              <span class="val fw-bold" id="paymentSeat">—</span>
+            </div>
+            <div class="row-item total-row">
+              <span class="label">Tổng tiền</span>
+              <span class="val text-orange fw-bold" id="paymentAmount">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===================== QR CHUYỂN KHOẢN VCB ===================== -->
+<div id="qrOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+     z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:20px; max-width:460px; width:94%;
+              padding:32px 28px; box-shadow:0 24px 64px rgba(0,0,0,.35);
+              position:relative; text-align:center; max-height:92vh; overflow-y:auto;">
+
+    <button onclick="closeQR()" style="position:absolute;top:14px;right:18px;
+            background:none;border:none;font-size:1.5rem;color:#aaa;cursor:pointer;line-height:1;">✕</button>
+
+    <div style="font-size:1.25rem;font-weight:800;color:#006400;margin-bottom:4px;">
+      🏦 Chuyển khoản Vietcombank
+    </div>
+    <p style="color:#666;font-size:.88rem;margin-bottom:18px;">
+      Mở app ngân hàng → Quét mã QR để thanh toán tự động
+    </p>
+
+    <!-- QR image -->
+    <div style="display:flex;justify-content:center;margin-bottom:18px;">
+      <div style="position:relative;width:240px;height:240px;">
+        <img id="qrImg" src="" alt="QR VCB"
+             style="width:240px;height:240px;border-radius:14px;
+                    border:2px solid #e8e8e8;object-fit:contain;display:block;">
+        <div id="qrLoading" style="position:absolute;inset:0;display:flex;align-items:center;
+             justify-content:center;background:#f8f8f8;border-radius:14px;font-size:.85rem;color:#888;">
+          Đang tải QR...
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank detail table -->
+    <div style="background:#f6faf6;border:1px solid #c8e6c9;border-radius:12px;
+                padding:14px 18px;text-align:left;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8f5e9;">
+        <span style="color:#777;font-size:.83rem;">Ngân hàng</span>
+        <span style="font-weight:700;color:#006400;font-size:.9rem;">Vietcombank (VCB)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8f5e9;">
+        <span style="color:#777;font-size:.83rem;">Số tài khoản</span>
+        <span style="font-weight:700;font-family:monospace;font-size:1rem;letter-spacing:.05em;">1030082932</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8f5e9;">
+        <span style="color:#777;font-size:.83rem;">Chủ tài khoản</span>
+        <span style="font-weight:600;font-size:.9rem;">BUS BOOKING</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8f5e9;">
+        <span style="color:#777;font-size:.83rem;">Số tiền</span>
+        <span style="font-weight:800;color:#e65c00;font-size:1.05rem;" id="qrAmountLabel">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;">
+        <span style="color:#777;font-size:.83rem;white-space:nowrap;margin-right:10px;">Nội dung CK</span>
+        <span style="font-weight:600;font-size:.83rem;text-align:right;color:#333;max-width:230px;"
+              id="qrDescLabel">—</span>
+      </div>
+    </div>
+
+    <p style="font-size:.78rem;color:#e65c00;margin-bottom:18px;">
+      ⚠️ Nhập <strong>đúng số tiền</strong> và <strong>nội dung</strong> để hệ thống tự xác nhận.
+    </p>
+
+    <button id="qrConfirmBtn" onclick="confirmQRPayment()"
+            style="background:linear-gradient(135deg,#00873e,#006400);color:#fff;border:none;
+                   border-radius:12px;padding:15px 0;width:100%;font-size:1rem;
+                   font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,100,0,.25);">
+      ✅ Tôi đã chuyển khoản xong
+    </button>
+    <button onclick="closeQR()"
+            style="background:none;border:none;color:#bbb;margin-top:10px;
+                   width:100%;font-size:.85rem;cursor:pointer;padding:6px 0;">
+      Huỷ, chọn phương thức khác
+    </button>
+  </div>
+</div>
+
+<style>
+  .method-card { transition: border-color 0.15s, box-shadow 0.15s; }
+  .method-card.active { border-color: #1e6fff !important; box-shadow: 0 0 0 3px rgba(30,111,255,0.15); }
+</style>
+
+<script src="js/theme.js"></script>
+<script src="js/payment.js"></script>
+<script>
+  // ── Method selection UI ──────────────────────────────────────────────────
+  document.querySelectorAll('[name="method"]').forEach(radio => {
+    radio.closest("label").addEventListener("click", function() {
+      document.querySelectorAll(".method-card").forEach(c => c.classList.remove("active"))
+      this.classList.add("active")
+      radio.checked = true
+      const labels = {
+        CREDIT_CARD: "Thẻ tín dụng", CASH: "Tiền mặt",
+        BANK_TRANSFER: "Chuyển khoản", E_WALLET: "Ví điện tử"
+      }
+      document.getElementById("selectedMethodLabel").innerText = labels[radio.value] || radio.value
+    })
+  })
+  document.querySelector(".method-card").classList.add("active")
+
+  function getSelectedMethod() {
+    const checked = document.querySelector('[name="method"]:checked')
+    return checked ? checked.value : "CREDIT_CARD"
+  }
+
+  // ── Main payment handler ─────────────────────────────────────────────────
+  async function doPayment() {
+    const method = getSelectedMethod()
+
+    if (method === "BANK_TRANSFER") {
+      openQR()
+      return
+    }
+
+    const btn = document.getElementById("payBtn")
+    const errEl = document.getElementById("errMsg")
+    btn.disabled = true
+    btn.innerText = "Đang xử lý..."
+    errEl.style.display = "none"
+
+    window._selectedMethod = method
+    try {
+      await pay()
+    } catch (e) {
+      errEl.style.display = "block"
+      errEl.innerText = "Có lỗi xảy ra."
+    } finally {
+      btn.disabled = false
+      btn.innerText = "Thanh toán ngay →"
+    }
+  }
+
+  // ── QR Modal helpers ─────────────────────────────────────────────────────
+  const VCB_ACCOUNT = "1030082932"
+  const VCB_BANK_ID = "VCB"
+  const VCB_OWNER   = "BUS BOOKING"
+
+  function buildQRDesc() {
+    const passenger = localStorage.getItem("passengerName") || localStorage.getItem("username") || "KH"
+    const seat      = localStorage.getItem("seatNumber") || ""
+    const origin    = localStorage.getItem("tripOrigin") || ""
+    const dest      = localStorage.getItem("tripDestination") || ""
+    const ticketId  = localStorage.getItem("ticketId") || ""
+    const route     = (origin && dest) ? `${origin}-${dest}` : ""
+    // Keep description short (max ~50 chars for QR content)
+    return `Ve ${route} Ghe ${seat} HD${ticketId} ${passenger}`.trim().substring(0, 50)
+  }
+
+  function openQR() {
+    const amount  = Number(localStorage.getItem("tripPrice") || 0)
+    const desc    = buildQRDesc()
+
+    // VietQR public API (no key needed, free tier)
+    const qrUrl = `https://img.vietqr.io/image/${VCB_BANK_ID}-${VCB_ACCOUNT}-compact2.png` +
+                  `?amount=${amount}` +
+                  `&addInfo=${encodeURIComponent(desc)}` +
+                  `&accountName=${encodeURIComponent(VCB_OWNER)}`
+
+    const img      = document.getElementById("qrImg")
+    const loading  = document.getElementById("qrLoading")
+    img.src        = ""
+    loading.style.display = "flex"
+
+    img.onload  = () => { loading.style.display = "none" }
+    img.onerror = () => { loading.innerText = "Không tải được QR. Kiểm tra mạng." }
+    img.src = qrUrl
+
+    document.getElementById("qrAmountLabel").innerText =
+      amount ? amount.toLocaleString("vi-VN") + " VND" : "—"
+    document.getElementById("qrDescLabel").innerText = desc
+
+    const overlay = document.getElementById("qrOverlay")
+    overlay.style.display = "flex"
+    document.body.style.overflow = "hidden"
+  }
+
+  function closeQR() {
+    document.getElementById("qrOverlay").style.display = "none"
+    document.body.style.overflow = ""
+  }
+
+  // Close modal when clicking backdrop
+  document.getElementById("qrOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeQR()
+  })
+
+  async function confirmQRPayment() {
+    const btn   = document.getElementById("qrConfirmBtn")
+    const errEl = document.getElementById("errMsg")
+    btn.disabled  = true
+    btn.innerText = "Đang xác nhận..."
+
+    window._selectedMethod = "BANK_TRANSFER"
+    try {
+      await pay()
+    } catch (e) {
+      closeQR()
+      errEl.style.display = "block"
+      errEl.innerText = "Có lỗi xảy ra khi xác nhận thanh toán."
+    } finally {
+      btn.disabled  = false
+      btn.innerText = "✅ Tôi đã chuyển khoản xong"
+    }
+  }
+
+  // ── Inline error override ────────────────────────────────────────────────
+  const _a = window.alert
+  window.alert = function(msg) {
+    if (!msg) return
+    const lc = msg.toLowerCase()
+    if (lc.includes("failed") || lc.includes("error") || lc.includes("missing")) {
+      const el = document.getElementById("errMsg")
+      el.style.display = "block"
+      el.innerText = msg
+    } else {
+      _a(msg)
+    }
+  }
+</script>
+
+</body>
+</html>

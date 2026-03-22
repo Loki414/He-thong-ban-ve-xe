@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Thông tin hành khách – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Progress steps -->
+<div class="bg-white border-bottom py-2">
+  <div class="container">
+    <div class="d-flex align-items-center gap-2 small text-muted">
+      <span class="text-muted">Tìm chuyến</span>
+      <span>›</span>
+      <span class="text-muted">Chọn ghế</span>
+      <span>›</span>
+      <span class="text-primary fw-semibold">Thông tin</span>
+      <span>›</span>
+      <span>Thanh toán</span>
+      <span>›</span>
+      <span>Xác nhận</span>
+    </div>
+  </div>
+</div>
+
+<main class="container py-4">
+  <div class="row g-4">
+
+    <!-- Form -->
+    <div class="col-lg-7">
+      <h5 class="fw-bold mb-4">Thông tin hành khách</h5>
+
+      <div id="errMsg" class="alert alert-danger small py-2 mb-3" style="display:none"></div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="name">Họ tên <span class="text-danger">*</span></label>
+          <input id="name" class="form-control" placeholder="Nguyễn Văn A" autocomplete="name">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="phone">Số điện thoại <span class="text-danger">*</span></label>
+          <input id="phone" class="form-control" placeholder="0909 xxx xxx" type="tel" autocomplete="tel">
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="email">Email nhận vé</label>
+          <input id="email" class="form-control" placeholder="email@example.com" type="email" autocomplete="email">
+          <div class="form-text">Không bắt buộc – chỉ để nhận xác nhận qua email.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="note">Ghi chú</label>
+          <textarea id="note" class="form-control" rows="2"
+                    placeholder="Yêu cầu đặc biệt (cửa sổ, hàng đầu...)"></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-success w-100 fw-semibold py-2 mt-4"
+              id="confirmBtn" onclick="doConfirmBooking()">
+        Xác nhận & Tiến đến thanh toán →
+      </button>
+    </div>
+
+    <!-- Summary -->
+    <div class="col-lg-5">
+      <h5 class="fw-bold mb-4">Tóm tắt đơn</h5>
+      <div class="summary-box">
+        <div class="row-item">
+          <span class="label">Tuyến</span>
+          <span class="val" id="sRoute">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Khởi hành</span>
+          <span class="val" id="sDep">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Xe</span>
+          <span class="val" id="sBus">—</span>
+        </div>
+        <div class="row-item">
+          <span class="label">Ghế</span>
+          <span class="val text-warning fw-bold" id="sSeat">—</span>
+        </div>
+        <div class="row-item total-row">
+          <span class="label">Tổng tiền</span>
+          <span class="val" id="sPrice">—</span>
+        </div>
+      </div>
+
+      <p class="small text-muted mt-3">
+        🔒 Ghế đang được giữ trong 5 phút. Vui lòng hoàn tất đặt vé trước khi hết giờ.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/theme.js"></script>
+<script src="js/booking.js"></script>
+<script>
+  // Fill summary
+  function formatDep(raw) {
+    if (!raw) return "—"
+    try {
+      const v = JSON.parse(raw)
+      const d = Array.isArray(v)
+        ? new Date(v[0], v[1]-1, v[2], v[3]||0, v[4]||0)
+        : new Date(v)
+      return d.toLocaleString("vi-VN", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      })
+    } catch { return raw }
+  }
+
+  document.getElementById("sRoute").innerText = `${localStorage.getItem("tripOrigin")||""} → ${localStorage.getItem("tripDestination")||""}`
+  document.getElementById("sDep").innerText = formatDep(localStorage.getItem("tripDepartureTime"))
+  document.getElementById("sBus").innerText = `${localStorage.getItem("tripBusNumber")||""} · ${localStorage.getItem("tripBusType")||""}`
+  document.getElementById("sSeat").innerText = localStorage.getItem("seatNumber") || localStorage.getItem("seatId") || "—"
+  const price = Number(localStorage.getItem("tripPrice") || 0)
+  document.getElementById("sPrice").innerText = price ? price.toLocaleString("vi-VN") + " VND" : "—"
+
+  async function doConfirmBooking() {
+    const name = document.getElementById("name").value.trim()
+    const phone = document.getElementById("phone").value.trim()
+    const errEl = document.getElementById("errMsg")
+
+    if (!name) { errEl.style.display = "block"; errEl.innerText = "Vui lòng nhập họ tên."; return }
+    if (!phone) { errEl.style.display = "block"; errEl.innerText = "Vui lòng nhập số điện thoại."; return }
+    errEl.style.display = "none"
+
+    const btn = document.getElementById("confirmBtn")
+    btn.disabled = true
+    btn.innerText = "Đang xử lý..."
+
+    try {
+      await confirmBooking()
+    } catch (e) {
+      errEl.style.display = "block"
+      errEl.innerText = "Có lỗi xảy ra."
+    } finally {
+      btn.disabled = false
+      btn.innerText = "Xác nhận & Tiến đến thanh toán →"
+    }
+  }
+
+  // Override alert for inline errors
+  const _a = window.alert
+  window.alert = function(msg) {
+    if (!msg) return
+    const lc = msg.toLowerCase()
+    if (lc.includes("failed") || lc.includes("error") || lc.includes("seat") || lc.includes("login")) {
+      const el = document.getElementById("errMsg")
+      el.style.display = "block"
+      el.innerText = msg
+    } else {
+      _a(msg)
+    }
+  }
+</script>
+
+</body>
+</html>

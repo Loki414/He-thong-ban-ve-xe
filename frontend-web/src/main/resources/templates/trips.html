@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chuyến xe – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Search bar ── */
+    .search-bar {
+      background: linear-gradient(135deg, #1e6fff 0%, #0f4edb 100%);
+      padding: 20px 0 24px;
+    }
+    .search-bar .form-control,
+    .search-bar .form-select {
+      height: 46px;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      border: none;
+    }
+    .search-bar label {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* ── Autocomplete ── */
+    .ac-wrap { position: relative; }
+
+    /* ── Popular chips ── */
+    .popular-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.9);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .popular-chip:hover { background: rgba(255,255,255,0.28); color: #fff; }
+
+    /* ── Trip cards ── */
+    .trip-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #eaedf0;
+      padding: 18px 22px;
+      margin-bottom: 14px;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .trip-card:hover { box-shadow: 0 8px 28px rgba(30,111,255,0.1); border-color: #c7d9ff; }
+
+    .route-label { font-size: 1.05rem; font-weight: 700; color: #1a202c; }
+    .meta-text   { font-size: 0.82rem; color: #718096; }
+    .badge-bus   { background: #e8f0fe; color: #1e6fff; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 600; }
+    .badge-type  { background: #f0fff4; color: #276749; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 600; }
+    .price       { font-size: 1.3rem; font-weight: 800; color: #ff6b00; }
+    .btn-select  { background: linear-gradient(135deg, #ff6b00, #e55f00); border: none; color: #fff; font-weight: 700; border-radius: 10px; padding: 10px 22px; transition: transform 0.15s, box-shadow 0.2s; }
+    .btn-select:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,107,0,0.3); color: #fff; }
+
+    /* ── Swap button ── */
+    .swap-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid #d0deff; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem;
+      transition: border-color 0.15s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    .swap-btn:hover { border-color: #1e6fff; transform: rotate(180deg); }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 60px 0; }
+    .empty-state .icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+    /* ── Status badges ── */
+    .trip-status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .72rem; font-weight: 700; border-radius: 99px;
+      padding: 3px 10px; white-space: nowrap;
+    }
+    .trip-status-badge.departed  { background:#fee2e2; color:#991b1b; }
+    .trip-status-badge.imminent  { background:#fff7ed; color:#c2410c; }
+    .trip-status-badge.today     { background:#fefce8; color:#854d0e; }
+    .trip-status-badge.scheduled { background:#dcfce7; color:#166534; }
+
+    /* ── Countdown ── */
+    .countdown-label {
+      font-size: .75rem; color: #c2410c; background: #fff7ed;
+      padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+    }
+
+    /* ── Seat bar ── */
+    .seat-bar-wrap  { display: flex; flex-direction: column; gap: 3px; }
+    .seat-bar-track { height: 6px; border-radius: 99px; background: #e5e7eb; overflow: hidden; }
+    .seat-bar-fill  { height: 100%; border-radius: 99px; transition: width .4s; }
+    .seat-bar-label { font-size: .78rem; }
+
+    /* ── Departed card ── */
+    .departed-card { opacity: .6; background: #f9fafb !important; }
+    .departed-card .route-label { color: #9ca3af; }
+
+    /* ── Imminent highlight ── */
+    .imminent-card { border-left: 4px solid #f97316 !important; }
+
+    /* ── Filter tabs ── */
+    .filter-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filter-tab {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border-radius: 99px; border: 1.5px solid #e2e8f0;
+      background: #fff; font-size: .82rem; font-weight: 600; color: #4a5568;
+      cursor: pointer; transition: all .15s; user-select: none;
+    }
+    .filter-tab:hover  { border-color: #93c5fd; color: #1e6fff; }
+    .filter-tab.active { border-color: #1e6fff; background: #eef4ff; color: #1e6fff; }
+    .tab-count {
+      background: #e2e8f0; color: #4a5568; border-radius: 99px;
+      padding: 0px 7px; font-size: .72rem; min-width: 20px; text-align: center;
+    }
+    .filter-tab.active .tab-count { background: #bfdbfe; color: #1d4ed8; }
+
+    /* ── Refresh indicator ── */
+    .refresh-row { display: flex; align-items: center; gap: 10px; }
+    .refresh-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
+                   animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.5; transform:scale(1.4); }
+    }
+  </style>
+</head>
+<body style="background:#f5f6fa">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/" style="color:#1e6fff;font-size:1.1rem">🚌 BusBooking</a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span id="themeToggleContainer"></span>
+      <div id="navAuthArea"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <div class="container">
+    <!-- Popular chips -->
+    <div class="d-flex flex-wrap gap-2 mb-3" id="popularChips">
+      <span style="color:rgba(255,255,255,0.7);font-size:0.75rem;align-self:center">🔥 Tuyến phổ biến:</span>
+    </div>
+
+    <!-- Search form -->
+    <form onsubmit="return doSearch()">
+      <div class="row g-2 align-items-end">
+        <div class="col">
+          <label>Điểm đi</label>
+          <div class="ac-wrap">
+            <input id="sOrigin" class="form-control" placeholder="TP. Hồ Chí Minh" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="col-auto d-none d-md-flex align-items-end pb-1">
+          <button type="button" class="swap-btn" onclick="swapSearch()" title="Đổi chiều">⇄</button>
+        </div>
+
+        <div class="col">
+          <label>Điểm đến</label>
+          <div class="ac-wrap">
+            <input id="sDestination" class="form-control" placeholder="Đà Lạt" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label>Ngày đi</label>
+          <input id="sDate" type="date" class="form-control">
+        </div>
+
+        <div class="col-md-2">
+          <button type="submit" class="btn w-100 fw-bold"
+                  style="height:46px;background:#ff6b00;border:none;color:#fff;border-radius:10px">
+            🔍 Tìm
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<main class="container py-4">
+
+  <!-- Header row -->
+  <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+    <div>
+      <h5 class="fw-bold mb-0">Chuyến xe theo thời gian thực</h5>
+      <p class="text-muted small mb-0" id="tripSearchInfo"></p>
+    </div>
+    <div class="refresh-row">
+      <div class="refresh-dot" title="Tự cập nhật mỗi 60 giây"></div>
+      <span class="text-muted small" id="lastUpdated"></span>
+      <button class="btn btn-outline-primary btn-sm px-3" onclick="loadTrips()" title="Làm mới ngay">
+        🔄 Làm mới
+      </button>
+      <span id="tripCount" class="badge bg-primary rounded-pill" style="display:none"></span>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <div class="filter-tab" data-filter="upcoming" onclick="setFilter('upcoming')">
+      🚀 Sắp khởi hành <span class="tab-count">—</span>
+    </div>
+    <div class="filter-tab" data-filter="today" onclick="setFilter('today')">
+      ⚡ Trong 6 giờ <span class="tab-count">—</span>
+    </div>
+    <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">
+      📋 Tất cả <span class="tab-count">—</span>
+    </div>
+    <div class="filter-tab" data-filter="departed" onclick="setFilter('departed')">
+      🔴 Đã khởi hành <span class="tab-count">—</span>
+    </div>
+  </div>
+
+  <div id="tripList">
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted small">Đang tải danh sách chuyến...</p>
+    </div>
+  </div>
+</main>
+
+<footer class="py-3 bg-white border-top text-center text-muted">
+  <span class="small">© 2026 BusBooking</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/autocomplete.js"></script>
+<script src="js/trips.js"></script>
+<script>
+  // ---- Restore search values from localStorage ----
+  document.getElementById("sOrigin").value      = localStorage.getItem("origin") || ""
+  document.getElementById("sDestination").value = localStorage.getItem("destination") || ""
+  document.getElementById("sDate").value        = localStorage.getItem("date") || ""
+
+  // ---- Search action ----
+  function doSearch() {
+    localStorage.setItem("origin",      document.getElementById("sOrigin").value.trim())
+    localStorage.setItem("destination", document.getElementById("sDestination").value.trim())
+    localStorage.setItem("date",        document.getElementById("sDate").value)
+    loadTrips()
+    return false
+  }
+
+  // ---- Swap origin ↔ destination ----
+  function swapSearch() {
+    const o = document.getElementById("sOrigin")
+    const d = document.getElementById("sDestination")
+    const tmp = o.value; o.value = d.value; d.value = tmp
+  }
+
+  // ---- Quick chip search ----
+  function chipSearch(origin, destination) {
+    document.getElementById("sOrigin").value      = origin
+    document.getElementById("sDestination").value = destination
+    localStorage.setItem("origin", origin)
+    localStorage.setItem("destination", destination)
+    loadTrips()
+  }
+
+  // ---- Navbar ----
+  ;(function() {
+    const area     = document.getElementById("navAuthArea")
+    const token    = localStorage.getItem("token")
+    const username = localStorage.getItem("username")
+    const role     = localStorage.getItem("role")
+    if (!area) return
+    if (token && username) {
+      area.innerHTML = `
+        <span class="small text-muted d-none d-md-inline">Xin chào, <strong>${username}</strong></span>
+        ${role === "ROLE_ADMIN" ? '<a href="/admin/dashboard" class="btn btn-outline-secondary btn-sm">Admin</a>' : ""}
+        <button class="btn btn-outline-danger btn-sm" onclick="doLogout()">Đăng xuất</button>`
+    } else {
+      area.innerHTML = `<a href="/login" class="btn btn-outline-primary btn-sm">Đăng nhập</a>`
+    }
+  })()
+  function doLogout() {
+    ["token","userId","username","role"].forEach(k => localStorage.removeItem(k))
+    window.location = "/"
+  }
+
+  // ---- Init autocomplete + popular chips ----
+  ;(async function() {
+    await initRouteAutocomplete("sOrigin", "sDestination")
+
+    // Popular chips
+    const chips    = acPopularRoutes()
+    const chipsEl  = document.getElementById("popularChips")
+    chips.forEach(c => {
+      const el = document.createElement("span")
+      el.className = "popular-chip"
+      el.innerHTML = `🗺 ${c.label}`
+      el.onclick = () => chipSearch(c.origin, c.destination)
+      chipsEl.appendChild(el)
+    })
+  })()
+
+  // ---- Initial load ----
+  loadTrips()
+</script>
+</body>
+</html>

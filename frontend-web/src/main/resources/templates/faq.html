@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Câu hỏi thường gặp – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-hero { background: linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:56px 0 40px; }
+    .accordion-button:not(.collapsed) { background:#eef4ff; color:#1e3c72; }
+    .accordion-button:focus { box-shadow:none; }
+    .faq-category { font-size:.75rem; font-weight:700; text-transform:uppercase;
+                    letter-spacing:1px; color:#2a5298; margin:32px 0 12px; }
+  </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="/" class="btn btn-outline-secondary btn-sm">← Trang chủ</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="page-hero text-center">
+  <div class="container">
+    <div style="font-size:3rem;margin-bottom:10px;">❓</div>
+    <h1 class="fw-bold mb-2">Câu hỏi thường gặp</h1>
+    <p class="opacity-75 mb-0">Tìm câu trả lời nhanh cho các thắc mắc phổ biến</p>
+  </div>
+</div>
+
+<main class="container py-5" style="max-width:820px">
+
+  <!-- Đặt vé -->
+  <p class="faq-category">🎫 Đặt vé & Thanh toán</p>
+  <div class="accordion mb-2" id="faqA">
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
+          Tôi đặt vé xong thì nhận vé ở đâu?
+        </button>
+      </h2>
+      <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faqA">
+        <div class="accordion-body text-muted">
+          Sau khi thanh toán thành công, hệ thống hiển thị trang <strong>Xác nhận vé</strong> ngay lập tức kèm mã vé. Bạn có thể chụp màn hình hoặc lưu mã vé để xuất trình khi lên xe. Nếu để lại email, chúng tôi sẽ gửi xác nhận về hộp thư của bạn.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
+          Có thể thanh toán bằng những hình thức nào?
+        </button>
+      </h2>
+      <div id="q2" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          BusBooking hỗ trợ 4 hình thức thanh toán:<br>
+          <ul class="mt-2">
+            <li><strong>Thẻ tín dụng / ghi nợ</strong> – Visa, MasterCard, JCB</li>
+            <li><strong>Chuyển khoản ngân hàng</strong> – quét QR VietQR tự động điền thông tin</li>
+            <li><strong>Ví điện tử</strong> – MoMo, ZaloPay, VNPay</li>
+            <li><strong>Tiền mặt</strong> – thanh toán trực tiếp khi lên xe</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q3">
+          Ghế tôi chọn có bị người khác đặt mất không?
+        </button>
+      </h2>
+      <div id="q3" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          Ngay khi bạn chọn ghế, hệ thống sẽ <strong>khóa ghế trong 5 phút</strong>. Trong thời gian đó, không ai khác có thể chọn ghế của bạn. Nếu chưa hoàn tất thanh toán sau 5 phút, ghế sẽ được giải phóng trở lại để người khác đặt.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q4">
+          Tôi cần tạo tài khoản mới có thể đặt vé không?
+        </button>
+      </h2>
+      <div id="q4" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          Cần đăng nhập để đặt vé, nhưng đăng ký rất nhanh – chỉ cần tên đăng nhập và mật khẩu. Tài khoản giúp bạn quản lý lịch sử vé và thông tin hành khách dễ dàng hơn.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hoàn vé -->
+  <p class="faq-category">🔄 Hoàn vé & Đổi vé</p>
+  <div class="accordion mb-2">
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q5">
+          Tôi có thể hoàn vé không? Mất phí bao nhiêu?
+        </button>
+      </h2>
+      <div id="q5" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          Xem chi tiết tại <a href="/refund-policy" class="text-primary">Chính sách hoàn vé</a>. Tóm tắt:<br>
+          <ul class="mt-2">
+            <li>Trước 48 giờ: hoàn 90% giá vé</li>
+            <li>Trước 24 giờ: hoàn 70%</li>
+            <li>Trước 4 giờ: hoàn 50%</li>
+            <li>Dưới 4 giờ hoặc sau giờ khởi hành: không hoàn tiền</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q6">
+          Tiền hoàn về tài khoản sau bao lâu?
+        </button>
+      </h2>
+      <div id="q6" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          Thông thường <strong>3–7 ngày làm việc</strong> tuỳ ngân hàng. Chuyển khoản nội địa thường nhanh hơn, thẻ quốc tế có thể lên đến 10 ngày.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kỹ thuật -->
+  <p class="faq-category">⚙️ Kỹ thuật & Tài khoản</p>
+  <div class="accordion mb-2">
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q7">
+          Tôi quên mật khẩu, phải làm sao?
+        </button>
+      </h2>
+      <div id="q7" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          Vui lòng liên hệ hotline <a href="tel:0949355101" class="text-primary fw-semibold">0949 355 101</a> hoặc gửi email tới <a href="mailto:thphuc813@gmail.com" class="text-primary">thphuc813@gmail.com</a> để được hỗ trợ đặt lại mật khẩu.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3 overflow-hidden">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#q8">
+          Ứng dụng có chạy được trên điện thoại không?
+        </button>
+      </h2>
+      <div id="q8" class="accordion-collapse collapse">
+        <div class="accordion-body text-muted">
+          BusBooking được tối ưu responsive cho cả điện thoại, máy tính bảng và máy tính. Bạn có thể sử dụng trực tiếp qua trình duyệt mà không cần cài ứng dụng.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Still need help -->
+  <div class="card border-0 shadow-sm rounded-4 mt-5 text-center p-4" style="background:#eef4ff;">
+    <div style="font-size:2rem">💬</div>
+    <h5 class="fw-bold mt-2 mb-1">Vẫn chưa tìm được câu trả lời?</h5>
+    <p class="text-muted mb-3">Đội hỗ trợ của chúng tôi sẵn sàng giúp bạn 7 ngày / tuần.</p>
+    <a href="/contact" class="btn btn-primary px-5">Liên hệ hỗ trợ</a>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer style="background:#1a1a2e;color:rgba(255,255,255,.6);padding:40px 0 20px;margin-top:60px;">
+  <div class="container text-center">
+    <div class="mb-2" style="color:#fff;font-weight:800;font-size:1.1rem;">🚌 BusBooking</div>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mb-3" style="font-size:.85rem;">
+      <a href="/faq" style="color:rgba(255,255,255,.6);text-decoration:none;">Câu hỏi thường gặp</a>
+      <a href="/contact" style="color:rgba(255,255,255,.6);text-decoration:none;">Liên hệ</a>
+      <a href="/refund-policy" style="color:rgba(255,255,255,.6);text-decoration:none;">Chính sách hoàn vé</a>
+      <a href="/about" style="color:rgba(255,255,255,.6);text-decoration:none;">Giới thiệu</a>
+      <a href="/terms" style="color:rgba(255,255,255,.6);text-decoration:none;">Điều khoản</a>
+      <a href="/privacy" style="color:rgba(255,255,255,.6);text-decoration:none;">Bảo mật</a>
+    </div>
+    <div style="font-size:.78rem;opacity:.4;">© 2026 BusBooking. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>

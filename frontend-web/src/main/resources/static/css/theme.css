@@ -1,0 +1,167 @@
+/* =============================================
+   BusBooking – Light / Dark theme variables
+   Load this BEFORE style.css so variables are available.
+   ============================================= */
+
+:root {
+  /* Page */
+  --bg-body:       #f5f6fa;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f8faff;
+  --border-card:   #eaedf0;
+  --border-input:  #e2e8f0;
+
+  /* Text */
+  --text-primary:   #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted:     #718096;
+  --text-link:      #1e6fff;
+
+  /* Navbar / header */
+  --bg-nav:         #ffffff;
+  --text-nav:       #2d3748;
+  --text-nav-link:  #4a5568;
+  --border-nav:     #eaedf0;
+  --bg-topbar:      #f8fafc;
+  --text-topbar:    #64748b;
+
+  /* Search box / forms */
+  --bg-search:      #ffffff;
+  --shadow-card:    0 2px 12px rgba(0, 0, 0, 0.07);
+  --shadow-card-h:  0 8px 28px rgba(0, 0, 0, 0.12);
+
+  /* Summary box */
+  --bg-summary:     #f8faff;
+  --border-summary: #d0deff;
+  --border-summary-row: #e8edff;
+
+  /* Footer */
+  --bg-footer:      #1a1a2e;
+  --text-footer:    rgba(255, 255, 255, 0.6);
+  --text-footer-brand: #fff;
+
+  /* Theme toggle button */
+  --bg-toggle:      #e2e8f0;
+  --bg-toggle-hover:#cbd5e1;
+  --icon-sun:       #f59e0b;
+  --icon-moon:      #6366f1;
+}
+
+[data-theme="dark"] {
+  --bg-body:       #0f172a;
+  --bg-card:       #1e293b;
+  --bg-card-hover: #334155;
+  --border-card:   #334155;
+  --border-input:  #475569;
+
+  --text-primary:   #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #94a3b8;
+  --text-link:      #60a5fa;
+
+  --bg-nav:         #1e293b;
+  --text-nav:       #f1f5f9;
+  --text-nav-link:  #cbd5e1;
+  --border-nav:     #334155;
+  --bg-topbar:      #0f172a;
+  --text-topbar:    #94a3b8;
+
+  --bg-search:      #1e293b;
+  --shadow-card:    0 2px 12px rgba(0, 0, 0, 0.3);
+  --shadow-card-h:  0 8px 28px rgba(0, 0, 0, 0.4);
+
+  --bg-summary:     #334155;
+  --border-summary: #475569;
+  --border-summary-row: #475569;
+
+  --bg-footer:      #020617;
+  --text-footer:    rgba(255, 255, 255, 0.5);
+  --text-footer-brand: #e2e8f0;
+
+  --bg-toggle:      #334155;
+  --bg-toggle-hover:#475569;
+  --icon-sun:       #fbbf24;
+  --icon-moon:      #a5b4fc;
+}
+
+/* Apply body background and text from variables */
+body {
+  background: var(--bg-body) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Theme toggle button – injected by theme.js */
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-card);
+  background: var(--bg-toggle);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background 0.2s, transform 0.15s;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-toggle-hover);
+  transform: scale(1.05);
+}
+.theme-toggle-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--text-link);
+}
+
+/* Navbar/topbar when used with class or data-theme */
+[data-theme="dark"] .main-nav,
+[data-theme="dark"] .navbar {
+  background: var(--bg-nav) !important;
+  border-color: var(--border-nav);
+}
+[data-theme="dark"] .main-nav .nav-links a,
+[data-theme="dark"] .navbar a {
+  color: var(--text-nav-link);
+}
+[data-theme="dark"] .main-nav .nav-logo,
+[data-theme="dark"] .navbar .navbar-brand {
+  color: var(--text-nav-brand, #60a5fa) !important;
+}
+[data-theme="dark"] .top-bar {
+  background: #0f172a;
+  border-bottom: 1px solid var(--border-nav);
+}
+[data-theme="dark"] .card {
+  background: var(--bg-card);
+  border-color: var(--border-card);
+}
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .section-card {
+  background: var(--bg-card);
+  border-color: var(--border-card);
+}
+[data-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
+}
+[data-theme="dark"] .bg-light {
+  background: var(--bg-body) !important;
+}
+[data-theme="dark"] .bg-white {
+  background: var(--bg-card) !important;
+}
+[data-theme="dark"] .topbar {
+  background: var(--bg-nav) !important;
+  border-color: var(--border-nav);
+  color: var(--text-nav);
+}
+[data-theme="dark"] .kpi-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-card);
+}
+[data-theme="dark"] .kpi-card .kpi-value { color: var(--text-primary); }
+[data-theme="dark"] .kpi-card .kpi-label { color: var(--text-muted); }
+[data-theme="dark"] footer.footer-main,
+[data-theme="dark"] .footer-main {
+  background: var(--bg-footer) !important;
+}

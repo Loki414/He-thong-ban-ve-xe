@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Giới thiệu – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-hero { background: linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:72px 0 56px; }
+    .stat-box { background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.07);
+                padding:28px 20px; text-align:center; }
+    .stat-num { font-size:2.2rem; font-weight:800; color:#2a5298; }
+    .feature-icon { width:56px;height:56px;border-radius:14px;background:#eef4ff;
+                    display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+                    margin-bottom:14px; }
+    .team-card { border:none; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.07); overflow:hidden; }
+    .team-avatar { width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1e3c72,#2a5298);
+                   display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px; }
+    .section-title { font-size:1.6rem; font-weight:800; color:#1a1a2e; }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <span id="themeToggleContainer"></span>
+      <a href="/" class="btn btn-outline-secondary btn-sm">← Trang chủ</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="page-hero text-center">
+  <div class="container" style="max-width:700px">
+    <div style="font-size:3.5rem;margin-bottom:12px;">🚌</div>
+    <h1 class="fw-bold mb-3">Về BusBooking</h1>
+    <p class="opacity-75 fs-5">Nền tảng đặt vé xe khách trực tuyến đang trong giai đoạn ra mắt – được xây dựng với mong muốn giúp việc di chuyển trở nên dễ dàng hơn.</p>
+    <span class="badge text-bg-warning fw-semibold px-3 py-2 mt-3" style="font-size:.85rem;border-radius:20px;">🚀 Mới ra mắt – tháng 3/2026</span>
+  </div>
+</div>
+
+<main class="container py-5">
+
+  <!-- Launch banner -->
+  <div class="alert border-0 rounded-4 p-4 mb-5 d-flex align-items-start gap-3"
+       style="background:#fff8e1;">
+    <div style="font-size:2rem;line-height:1;">🌱</div>
+    <div>
+      <div class="fw-bold mb-1">Chúng tôi vừa chính thức ra mắt!</div>
+      <div class="text-muted small">BusBooking hiện đang trong giai đoạn đầu hoạt động. Số liệu và tuyến đường sẽ dần mở rộng theo thời gian. Cảm ơn bạn đã đồng hành cùng chúng tôi từ những ngày đầu.</div>
+    </div>
+  </div>
+
+  <!-- Mission -->
+  <div class="row align-items-center g-5 mb-5">
+    <div class="col-lg-6">
+      <h2 class="section-title mb-3">Mục tiêu của chúng tôi</h2>
+      <p class="text-muted">BusBooking ra đời với mong muốn đơn giản: giúp việc đặt vé xe khách bớt mất thời gian. Thay vì phải gọi điện hay đến đại lý, bạn có thể tìm chuyến và đặt vé ngay trên điện thoại.</p>
+      <p class="text-muted">Đây là bước đầu tiên. Chúng tôi sẽ lắng nghe phản hồi và cải thiện dần để mang lại trải nghiệm tốt hơn mỗi ngày.</p>
+    </div>
+    <div class="col-lg-6">
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="card border-0 rounded-3 p-3 shadow-sm">
+            <div class="feature-icon">⚡</div>
+            <div class="fw-semibold mb-1">Đặt vé nhanh</div>
+            <div class="text-muted small">Tìm chuyến và đặt vé chỉ trong vài bước</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card border-0 rounded-3 p-3 shadow-sm">
+            <div class="feature-icon">🔒</div>
+            <div class="fw-semibold mb-1">Thanh toán an toàn</div>
+            <div class="text-muted small">Mã hóa JWT, hỗ trợ QR VietQR</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card border-0 rounded-3 p-3 shadow-sm">
+            <div class="feature-icon">🗺️</div>
+            <div class="fw-semibold mb-1">Các tuyến phổ biến</div>
+            <div class="text-muted small">Phủ các tuyến chính trên cả nước</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card border-0 rounded-3 p-3 shadow-sm">
+            <div class="feature-icon">🎧</div>
+            <div class="fw-semibold mb-1">Hỗ trợ nhiệt tình</div>
+            <div class="text-muted small">Đội nhỏ nhưng luôn sẵn sàng giúp bạn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5" style="background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h3 class="fw-bold mb-3">Tại sao chúng tôi làm điều này?</h3>
+        <p class="opacity-75">BusBooking bắt đầu từ một dự án nhỏ – muốn áp dụng kiến thức lập trình để giải quyết bài toán thực tế: đặt vé xe khách bớt rắc rối hơn, minh bạch hơn và không cần xếp hàng.</p>
+        <p class="opacity-75 mb-0">Đây vẫn là bản đầu tiên và còn nhiều thứ cần cải thiện. Mọi góp ý từ bạn đều rất quý giá với chúng tôi.</p>
+      </div>
+      <div class="col-lg-4 text-center mt-4 mt-lg-0">
+        <div style="font-size:4.5rem">🌱</div>
+        <div class="fw-semibold opacity-75 mt-2">Mới ra mắt · Tháng 3/2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback CTA -->
+  <div class="text-center p-5 rounded-4" style="background:#eef4ff;">
+    <div style="font-size:2rem;margin-bottom:8px;">💬</div>
+    <h4 class="fw-bold mb-2">Góp ý để chúng tôi hoàn thiện hơn</h4>
+    <p class="text-muted mb-3">Bạn gặp vấn đề gì, hay có ý tưởng cải tiến? Chúng tôi rất muốn lắng nghe.</p>
+    <a href="/contact" class="btn btn-primary px-5">Gửi phản hồi</a>
+  </div>
+
+</main>
+
+<footer style="background:#1a1a2e;color:rgba(255,255,255,.6);padding:40px 0 20px;margin-top:60px;">
+  <div class="container text-center">
+    <div class="mb-2" style="color:#fff;font-weight:800;font-size:1.1rem;">🚌 BusBooking</div>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mb-3" style="font-size:.85rem;">
+      <a href="/faq" style="color:rgba(255,255,255,.6);text-decoration:none;">Câu hỏi thường gặp</a>
+      <a href="/contact" style="color:rgba(255,255,255,.6);text-decoration:none;">Liên hệ</a>
+      <a href="/refund-policy" style="color:rgba(255,255,255,.6);text-decoration:none;">Chính sách hoàn vé</a>
+      <a href="/about" style="color:rgba(255,255,255,.6);text-decoration:none;">Giới thiệu</a>
+      <a href="/terms" style="color:rgba(255,255,255,.6);text-decoration:none;">Điều khoản</a>
+      <a href="/privacy" style="color:rgba(255,255,255,.6);text-decoration:none;">Bảo mật</a>
+    </div>
+    <div style="font-size:.78rem;opacity:.4;">© 2026 BusBooking. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>

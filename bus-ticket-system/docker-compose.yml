@@ -1,0 +1,21 @@
+# MySQL 8 – khớp backend (application.properties mặc định)
+# Chạy: docker compose up -d   (từ thư mục chứa file này)
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql-bus-ticket
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: bus_ticket
+    volumes:
+      - mysql-bus-data:/var/lib/mysql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  mysql-bus-data:

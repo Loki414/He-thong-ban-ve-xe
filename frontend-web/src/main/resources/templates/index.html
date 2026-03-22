@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>BusBooking – Đặt vé xe khách online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== TOP BAR ===== */
+    .top-bar {
+      background: #0f4edb;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.78rem;
+      padding: 5px 0;
+    }
+    .top-bar a { color: rgba(255,255,255,0.85); text-decoration: none; }
+    .top-bar a:hover { color: #fff; }
+
+    /* ===== MAIN NAVBAR ===== */
+    .main-nav {
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .main-nav .container {
+      display: flex;
+      align-items: center;
+      height: 60px;
+      gap: 8px;
+    }
+    .nav-logo {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1e6fff;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .nav-logo:hover { color: #175fe0; }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0 auto 0 32px;
+      gap: 4px;
+    }
+    .nav-links li a {
+      display: block;
+      padding: 8px 14px;
+      color: #4a5568;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-links li a:hover { background: #f0f4ff; color: #1e6fff; }
+
+    /* Guest buttons */
+    .nav-guest a {
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 7px 16px;
+    }
+
+    /* User dropdown */
+    .user-menu { position: relative; }
+    .user-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: #f0f4ff;
+      border: 1.5px solid #d0deff;
+      border-radius: 24px;
+      padding: 5px 14px 5px 6px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+    .user-btn:hover { background: #e0e9ff; border-color: #1e6fff; }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e6fff, #0f4edb);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .user-caret { font-size: 0.65rem; color: #718096; margin-left: 2px; }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #fff;
+      border: 1px solid #eaedf0;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      min-width: 210px;
+      overflow: hidden;
+      z-index: 999;
+    }
+    .user-dropdown.open { display: block; animation: dropIn 0.15s ease; }
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .user-dropdown-header {
+      background: linear-gradient(135deg, #1e6fff, #0f4edb);
+      padding: 14px 16px;
+      color: #fff;
+    }
+    .user-dropdown-header .uname { font-weight: 700; font-size: 0.95rem; }
+    .user-dropdown-header .urole { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+    .user-dropdown ul {
+      list-style: none;
+      padding: 8px 0;
+      margin: 0;
+    }
+    .user-dropdown ul li a, .user-dropdown ul li button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 16px;
+      background: transparent;
+      border: none;
+      text-align: left;
+      color: #2d3748;
+      font-size: 0.87rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.12s;
+    }
+    .user-dropdown ul li a:hover,
+    .user-dropdown ul li button:hover { background: #f5f7ff; }
+    .user-dropdown ul li.divider { border-top: 1px solid #f0f0f0; margin: 4px 0; }
+    .user-dropdown ul li button.logout-btn { color: #e53e3e; }
+    .user-dropdown ul li button.logout-btn:hover { background: #fff5f5; }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, #1e6fff 0%, #0f4edb 55%, #0b3ab5 100%);
+      padding: 70px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M0 0h40v40H0zm40 40h40v40H40z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-tagline {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #fff;
+    }
+    .hero-tagline span { color: #ffd166; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      color: #fff;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    /* ===== SEARCH BOX ===== */
+    .search-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px 28px 24px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    }
+    .search-box .form-control,
+    .search-box .form-select {
+      height: 48px;
+      font-size: 0.9rem;
+      border-color: #e2e8f0;
+      border-radius: 10px;
+    }
+    .search-box .form-control:focus,
+    .search-box .form-select:focus {
+      border-color: #1e6fff;
+      box-shadow: 0 0 0 3px rgba(30,111,255,0.12);
+    }
+    .search-box label { font-size: 0.78rem; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+    .search-btn {
+      height: 48px;
+      background: #ff6b00;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .search-btn:hover { background: #e55f00; transform: translateY(-1px); }
+    .search-btn:active { transform: translateY(0); }
+    .swap-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid #e2e8f0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: border-color 0.15s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    .swap-btn:hover { border-color: #1e6fff; transform: rotate(180deg); }
+
+    /* ===== POPULAR ROUTES ===== */
+    .route-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.9);
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .route-pill:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      background: #fff;
+      border-bottom: 1px solid #eaedf0;
+      padding: 14px 0;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .stat-num {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #1e6fff;
+      line-height: 1;
+    }
+    .stat-item .stat-label {
+      font-size: 0.75rem;
+      color: #718096;
+      margin-top: 5px;
+    }
+
+    /* ===== FEATURES ===== */
+    .feature-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #eaedf0;
+      height: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .step-num {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e6fff, #0f4edb);
+      color: #fff;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin: 0 auto 14px;
+      box-shadow: 0 4px 14px rgba(30,111,255,0.35);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer-main {
+      background: #1a202c;
+      color: rgba(255,255,255,0.75);
+      padding: 48px 0 28px;
+    }
+    .footer-brand { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .footer-col h6 { color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .footer-col ul { list-style: none; padding: 0; margin: 0; }
+    .footer-col ul li { margin-bottom: 8px; }
+    .footer-col ul li a { color: rgba(255,255,255,0.6); font-size: 0.83rem; text-decoration: none; transition: color 0.15s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 32px; font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+
+    /* Welcome toast */
+    .welcome-toast {
+      position: fixed;
+      top: 72px;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #d0deff;
+      border-radius: 12px;
+      padding: 12px 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      font-size: 0.88rem;
+      z-index: 9999;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar d-none d-md-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-4">
+      <span>📞 Hotline: <a href="tel:0949355101">0949 355 101</a></span>
+      <span>✉ <a href="mailto:thphuc813@gmail.com">thphuc813@gmail.com</a></span>
+    </div>
+    <div class="d-flex gap-4">
+      <a href="#">Khuyến mãi</a>
+      <a href="#">Hỗ trợ</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NAVBAR -->
+<nav class="main-nav">
+  <div class="container">
+    <a class="nav-logo" href="/">🚌 BusBooking</a>
+
+    <ul class="nav-links d-none d-lg-flex">
+      <li><a href="/trips">Tìm chuyến xe</a></li>
+      <li><a href="#features">Tiện ích</a></li>
+      <li><a href="#how-it-works">Cách hoạt động</a></li>
+    </ul>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span id="themeToggleContainer"></span>
+      <div id="authArea">
+        <a href="/login" class="btn btn-outline-primary btn-sm">Đăng nhập</a>
+        <a href="/register" class="btn btn-primary btn-sm">Đăng ký</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Welcome toast (shown right after login) -->
+<div class="welcome-toast" id="welcomeToast"></div>
+
+<!-- HERO -->
+<section class="hero d-flex align-items-center">
+  <div class="container position-relative" style="z-index:1">
+    <div class="row align-items-center g-5">
+
+      <!-- Left: headline + popular routes -->
+      <div class="col-lg-5 text-white">
+        <div class="hero-badge">🎉 Ưu đãi đến 30% cho chuyến đầu tiên</div>
+        <h1 class="hero-tagline mb-3">
+          Đặt vé xe<br>
+          <span>nhanh & dễ</span><br>
+          như đặt cơm
+        </h1>
+        <p class="mb-4" style="opacity:.85;font-size:.95rem">
+          So sánh hàng trăm chuyến xe, chọn ghế yêu thích, thanh toán chỉ trong vài giây.
+        </p>
+
+        <!-- Quick route pills: loaded from DB via autocomplete.js -->
+        <div class="d-flex flex-wrap gap-2 mb-2" id="heroRouteChips">
+          <!-- filled dynamically -->
+        </div>
+        <p style="font-size:.75rem;opacity:.6" class="mt-2">✦ Nhấn để điền nhanh tuyến đường</p>
+      </div>
+
+      <!-- Right: search box -->
+      <div class="col-lg-7">
+        <div class="search-box">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0" style="color:#1a202c">🔍 Tìm chuyến xe</h5>
+            <span class="badge text-bg-warning fw-semibold">Đặt ngay</span>
+          </div>
+
+          <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+              <label for="origin">Điểm đi</label>
+              <div style="position:relative">
+                <input id="origin" class="form-control" placeholder="TP. Hồ Chí Minh" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="col-md-1 text-center pb-1 d-none d-md-flex align-items-end justify-content-center">
+              <button class="swap-btn" onclick="swapLocations()" title="Đổi chiều">⇄</button>
+            </div>
+
+            <div class="col-md-5">
+              <label for="destination">Điểm đến</label>
+              <div style="position:relative">
+                <input id="destination" class="form-control" placeholder="Đà Lạt" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="col-md-1 d-md-none"></div>
+
+            <div class="col-md-5">
+              <label for="date">Ngày đi</label>
+              <input id="date" type="date" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label for="passengers">Số hành khách</label>
+              <select id="passengers" class="form-select">
+                <option value="1">1 hành khách</option>
+                <option value="2">2 hành khách</option>
+                <option value="3">3 hành khách</option>
+                <option value="4">4 hành khách</option>
+              </select>
+            </div>
+
+            <div class="col-md-1 d-none d-md-block"></div>
+
+            <div class="col-12 mt-1">
+              <button class="search-btn w-100" onclick="searchTrip()">
+                🔍 Tìm chuyến xe
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-3 mt-3 pt-2 border-top">
+            <span class="small text-muted d-flex align-items-center gap-1">
+              ✅ <span>Không mất phí đặt vé</span>
+            </span>
+            <span class="small text-muted d-flex align-items-center gap-1">
+              🔒 <span>Thanh toán bảo mật</span>
+            </span>
+            <span class="small text-muted d-flex align-items-center gap-1">
+              ⚡ <span>Xác nhận ngay lập tức</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">⚡</div>
+          <div class="stat-label">Đặt vé trong vài phút</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">🔒</div>
+          <div class="stat-label">Thanh toán bảo mật</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">🎫</div>
+          <div class="stat-label">Giữ ghế 5 phút</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-item">
+          <div class="stat-num">📞</div>
+          <div class="stat-label">Hỗ trợ tận tâm</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Vì sao chọn BusBooking?</h2>
+      <p class="text-muted">Nền tảng đặt vé hiện đại, minh bạch, không phiền phức.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#eff3ff">🖥️</div>
+          <h6 class="fw-bold mb-1">Giao diện trực quan</h6>
+          <p class="mb-0 small text-muted">
+            Thiết kế lấy cảm hứng từ Vexere & Traveloka, dễ sử dụng trên cả mobile lẫn desktop.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#f0fff4">💺</div>
+          <h6 class="fw-bold mb-1">Chọn ghế trực tiếp</h6>
+          <p class="mb-0 small text-muted">
+            Sơ đồ ghế màu sắc rõ ràng. Ghế được giữ 5 phút ngay khi bạn chọn để không ai tranh mất.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fff0f0">🔒</div>
+          <h6 class="fw-bold mb-1">Bảo mật JWT</h6>
+          <p class="mb-0 small text-muted">
+            Xác thực bằng JSON Web Token. Mọi giao dịch đều được kiểm soát và mã hóa an toàn.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fffbeb">💳</div>
+          <h6 class="fw-bold mb-1">Nhiều hình thức thanh toán</h6>
+          <p class="mb-0 small text-muted">
+            Hỗ trợ thẻ tín dụng, chuyển khoản ngân hàng, ví điện tử và tiền mặt.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#f0f9ff">⚡</div>
+          <h6 class="fw-bold mb-1">Xác nhận tức thì</h6>
+          <p class="mb-0 small text-muted">
+            Vé được xác nhận ngay sau khi thanh toán. Không cần chờ đợi hay gọi điện xác nhận.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#fdf4ff">📊</div>
+          <h6 class="fw-bold mb-1">Quản trị Admin</h6>
+          <p class="mb-0 small text-muted">
+            Dashboard đầy đủ: doanh thu, thống kê chuyến, quản lý vé, Chart.js analytics.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="py-5 bg-white">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Đặt vé chỉ với 4 bước</h2>
+      <p class="text-muted">Đơn giản, nhanh chóng, không phức tạp.</p>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-md-3">
+        <div class="step-num">1</div>
+        <div style="font-size:2.2rem" class="mb-2">🔍</div>
+        <h6 class="fw-semibold mb-1">Tìm chuyến</h6>
+        <p class="small text-muted mb-0">Nhập điểm đi, điểm đến và ngày khởi hành.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step-num">2</div>
+        <div style="font-size:2.2rem" class="mb-2">🚌</div>
+        <h6 class="fw-semibold mb-1">Chọn chuyến</h6>
+        <p class="small text-muted mb-0">Xem danh sách chuyến với đầy đủ thông tin và giá vé.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step-num">3</div>
+        <div style="font-size:2.2rem" class="mb-2">💺</div>
+        <h6 class="fw-semibold mb-1">Chọn ghế</h6>
+        <p class="small text-muted mb-0">Sơ đồ ghế trực quan, ghế tự động giữ 5 phút khi bạn chọn.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step-num">4</div>
+        <div style="font-size:2.2rem" class="mb-2">✅</div>
+        <h6 class="fw-semibold mb-1">Thanh toán</h6>
+        <p class="small text-muted mb-0">Chọn phương thức và nhận xác nhận vé ngay lập tức.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-main">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4 footer-col">
+        <div class="footer-brand mb-2">🚌 BusBooking</div>
+        <p style="font-size:.82rem;opacity:.6;max-width:240px">
+          Nền tảng đặt vé xe khách trực tuyến – nhanh, tiện, bảo mật.
+        </p>
+        <div class="d-flex gap-3 mt-3">
+          <a href="#" style="color:rgba(255,255,255,.5);font-size:1.2rem">📘</a>
+          <a href="#" style="color:rgba(255,255,255,.5);font-size:1.2rem">📸</a>
+          <a href="#" style="color:rgba(255,255,255,.5);font-size:1.2rem">🐦</a>
+        </div>
+      </div>
+      <div class="col-6 col-md-2 footer-col">
+        <h6>Dịch vụ</h6>
+        <ul>
+          <li><a href="/trips">Tìm chuyến xe</a></li>
+          <li><a href="#">Vé đã đặt</a></li>
+          <li><a href="#">Tuyến phổ biến</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-2 footer-col">
+        <h6>Hỗ trợ</h6>
+        <ul>
+          <li><a href="/faq">Câu hỏi thường gặp</a></li>
+          <li><a href="/contact">Liên hệ</a></li>
+          <li><a href="/refund-policy">Chính sách hoàn vé</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-2 footer-col">
+        <h6>Về chúng tôi</h6>
+        <ul>
+          <li><a href="/about">Giới thiệu</a></li>
+          <li><a href="/terms">Điều khoản</a></li>
+          <li><a href="/privacy">Bảo mật</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-2 footer-col">
+        <h6>Liên hệ</h6>
+        <ul>
+          <li><a href="tel:0949355101">📞 0949 355 101</a></li>
+          <li><a href="mailto:thphuc813@gmail.com">✉ thphuc813@gmail.com</a></li>
+          <li><a href="#">📍 TP. Hồ Chí Minh</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between">
+      <span>© 2026 BusBooking. All rights reserved.</span>
+      <span>Inspired by Vexere · Traveloka · RedBus</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/autocomplete.js"></script>
+<script>
+  /* ==============================
+     AUTH AREA
+  ============================== */
+  const token    = localStorage.getItem("token")
+  const username = localStorage.getItem("username")
+  const role     = localStorage.getItem("role")
+  const authArea = document.getElementById("authArea")
+
+  if (token && username) {
+    const initial = username.charAt(0).toUpperCase()
+    const roleLabel = role === "ROLE_ADMIN" ? "Quản trị viên" : "Thành viên"
+
+    authArea.innerHTML = `
+      <div class="user-menu">
+        <button class="user-btn" id="userBtn" onclick="toggleDropdown()">
+          <div class="avatar">${initial}</div>
+          <span>${username}</span>
+          <span class="user-caret">▼</span>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-header">
+            <div class="uname">${username}</div>
+            <div class="urole">${roleLabel}</div>
+          </div>
+          <ul>
+            <li><a href="/trips">🔍 Tìm chuyến xe</a></li>
+            ${role === "ROLE_ADMIN" ? '<li><a href="/admin/dashboard">📊 Trang Admin</a></li>' : ""}
+            <li class="divider"></li>
+            <li><button class="logout-btn" onclick="logout()">🚪 Đăng xuất</button></li>
+          </ul>
+        </div>
+      </div>
+    `
+
+    // Show welcome toast if just logged in
+    if (sessionStorage.getItem("justLoggedIn")) {
+      sessionStorage.removeItem("justLoggedIn")
+      const toast = document.getElementById("welcomeToast")
+      toast.innerHTML = `👋 Chào mừng trở lại, <strong>${username}</strong>!`
+      toast.style.display = "block"
+      setTimeout(() => { toast.style.opacity = "0"; toast.style.transition = "opacity .5s" }, 3000)
+      setTimeout(() => { toast.style.display = "none" }, 3600)
+    }
+  }
+
+  function toggleDropdown() {
+    document.getElementById("userDropdown").classList.toggle("open")
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener("click", function(e) {
+    const menu = document.querySelector(".user-menu")
+    if (menu && !menu.contains(e.target)) {
+      const d = document.getElementById("userDropdown")
+      if (d) d.classList.remove("open")
+    }
+  })
+
+  function logout() {
+    ["token","userId","username","role"].forEach(k => localStorage.removeItem(k))
+    window.location = "/"
+  }
+
+  /* ==============================
+     SEARCH
+  ============================== */
+  // Pre-fill from localStorage
+  document.getElementById("origin").value      = localStorage.getItem("origin")      || ""
+  document.getElementById("destination").value = localStorage.getItem("destination") || ""
+  document.getElementById("date").value        = localStorage.getItem("date")        || ""
+
+  function searchTrip() {
+    const origin      = document.getElementById("origin").value.trim()
+    const destination = document.getElementById("destination").value.trim()
+    const date        = document.getElementById("date").value
+
+    localStorage.setItem("origin",      origin)
+    localStorage.setItem("destination", destination)
+    localStorage.setItem("date",        date)
+
+    window.location = "/trips"
+  }
+
+  function swapLocations() {
+    const o = document.getElementById("origin")
+    const d = document.getElementById("destination")
+    const tmp = o.value
+    o.value = d.value
+    d.value = tmp
+  }
+
+  function quickSearch(from, to) {
+    document.getElementById("origin").value      = from
+    document.getElementById("destination").value = to
+  }
+
+  // Enter to search
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && ["origin","destination","date","passengers"].includes(e.target.id)) {
+      searchTrip()
+    }
+  })
+
+  /* ==============================
+     AUTOCOMPLETE + HERO CHIPS
+  ============================== */
+  ;(async function() {
+    await initRouteAutocomplete("origin", "destination")
+
+    // Build hero popular route chips from DB
+    const chips   = acPopularRoutes()
+    const chipsEl = document.getElementById("heroRouteChips")
+    if (chipsEl) {
+      chips.slice(0, 6).forEach(c => {
+        const el = document.createElement("span")
+        el.className = "route-pill"
+        el.innerHTML = `🗺 ${c.label}`
+        el.onclick = () => quickSearch(c.origin, c.destination)
+        chipsEl.appendChild(el)
+      })
+    }
+  })()
+</script>
+
+</body>
+</html>
