@@ -1,7 +1,12 @@
 const API = "http://localhost:8080/api"
 
+function authToken() {
+  if (typeof AuthState !== "undefined" && AuthState.getToken) return AuthState.getToken()
+  return sessionStorage.getItem("token") || localStorage.getItem("token") || ""
+}
+
 function authHeader() {
-  return { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
+  return { "Authorization": `Bearer ${authToken()}` }
 }
 
 async function apiFetch(path) {
@@ -136,8 +141,12 @@ function renderTripsChart(data) {
 // ---- Main load ----
 
 async function loadDashboard() {
-  const token = localStorage.getItem("token")
-  const role  = localStorage.getItem("role")
+  const token =
+    typeof AuthState !== "undefined" && AuthState.getToken ? AuthState.getToken() : authToken()
+  const role =
+    typeof AuthState !== "undefined" && AuthState.getRole
+      ? AuthState.getRole()
+      : sessionStorage.getItem("role") || localStorage.getItem("role") || ""
 
   if (!token || role !== "ROLE_ADMIN") {
     alert("Bạn không có quyền truy cập trang này.")

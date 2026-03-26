@@ -25,6 +25,9 @@ public class JwtService {
     @Value("${jwt.expiration-ms}")
     private long expirationMs;
 
+    @Value("${jwt.expiration-remember-ms}")
+    private long expirationRememberMs;
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -35,13 +38,22 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, expirationMs);
+    }
+
+    public String generateToken(UserDetails userDetails, boolean rememberMe) {
+        long ttl = Boolean.TRUE.equals(rememberMe) ? expirationRememberMs : expirationMs;
+        return generateToken(userDetails, ttl);
+    }
+
+    public String generateToken(UserDetails userDetails, long ttlMs) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities());
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + ttlMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

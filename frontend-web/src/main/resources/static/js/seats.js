@@ -63,7 +63,9 @@ async function selectSeat(id, booked) {
     return
   }
 
-  const token = localStorage.getItem("token")
+  const token = (typeof AuthState !== "undefined" && AuthState.getToken)
+    ? AuthState.getToken()
+    : (sessionStorage.getItem("token") || localStorage.getItem("token") || "")
   const userId = localStorage.getItem("userId")
 
   if (!token || !userId) {

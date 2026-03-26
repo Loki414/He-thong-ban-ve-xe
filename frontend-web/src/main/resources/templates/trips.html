@@ -248,6 +248,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/auth-state.js"></script>
 <script src="js/autocomplete.js"></script>
 <script src="js/trips.js"></script>
 <script>
@@ -284,9 +285,9 @@
   // ---- Navbar ----
   ;(function() {
     const area     = document.getElementById("navAuthArea")
-    const token    = localStorage.getItem("token")
-    const username = localStorage.getItem("username")
-    const role     = localStorage.getItem("role")
+    const token    = AuthState.getToken()
+    const username = AuthState.getUsername()
+    const role     = AuthState.getRole()
     if (!area) return
     if (token && username) {
       area.innerHTML = `
@@ -298,7 +299,7 @@
     }
   })()
   function doLogout() {
-    ["token","userId","username","role"].forEach(k => localStorage.removeItem(k))
+    AuthState.clear()
     window.location = "/"
   }
 

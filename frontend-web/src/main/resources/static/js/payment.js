@@ -32,7 +32,10 @@ function initPaymentSummary() {
 
 async function pay() {
   const ticketId = localStorage.getItem("ticketId")
-  const token = localStorage.getItem("token")
+  const token =
+    typeof AuthState !== "undefined" && AuthState.getToken
+      ? AuthState.getToken()
+      : sessionStorage.getItem("token") || localStorage.getItem("token") || ""
   const amount = Number(localStorage.getItem("tripPrice") || 300000)
 
   // Allow override from page-level script

@@ -121,6 +121,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/auth-state.js"></script>
 <script src="js/seats.js"></script>
 <script>
   // Render trip info from localStorage
@@ -154,7 +155,7 @@
   document.getElementById("sumPrice").innerText     = price ? price.toLocaleString("vi-VN") + " VND" : "—"
 
   // Show login warning if not logged in
-  if (!localStorage.getItem("token")) {
+  if (!AuthState.getToken()) {
     document.getElementById("loginWarning").style.display = "block"
   }
 </script>

@@ -2,8 +2,14 @@ const API = "http://localhost:8080/api"
 
 async function confirmBooking() {
   const seatId = localStorage.getItem("seatId")
-  const userId = localStorage.getItem("userId")
-  const token  = localStorage.getItem("token")
+  const userId =
+    (typeof AuthState !== "undefined" && AuthState.getUserId
+      ? AuthState.getUserId()
+      : sessionStorage.getItem("userId") || localStorage.getItem("userId")) || ""
+  const token =
+    typeof AuthState !== "undefined" && AuthState.getToken
+      ? AuthState.getToken()
+      : sessionStorage.getItem("token") || localStorage.getItem("token") || ""
 
   const name  = document.getElementById("name")?.value?.trim() || ""
   const phone = document.getElementById("phone")?.value?.trim() || ""

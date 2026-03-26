@@ -1,10 +1,23 @@
 package com.example.frontendweb.web;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
+
+    @Value("${backend.api.base-url}")
+    private String apiBase;
+
+    @Value("${app.google-client-id:}")
+    private String googleClientId;
+
+    private void authModel(Model model) {
+        model.addAttribute("apiBase", apiBase);
+        model.addAttribute("googleClientId", googleClientId != null ? googleClientId : "");
+    }
 
     @GetMapping({"/", "/index"})
     public String index() {
@@ -12,13 +25,27 @@ public class HomeController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Model model) {
+        authModel(model);
         return "login";
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model) {
+        authModel(model);
         return "register";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        authModel(model);
+        return "forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword(Model model) {
+        authModel(model);
+        return "reset-password";
     }
 
     @GetMapping("/trips")
@@ -81,4 +108,3 @@ public class HomeController {
         return "success";
     }
 }
-

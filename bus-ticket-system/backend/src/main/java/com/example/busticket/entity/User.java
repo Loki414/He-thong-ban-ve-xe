@@ -23,6 +23,10 @@ public class User {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", length = 20)
+    private AuthProvider authProvider;
+
     public Long getId() {
         return id;
     }
@@ -61,6 +65,14 @@ public class User {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider != null ? authProvider : AuthProvider.LOCAL;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
     }
 }
 

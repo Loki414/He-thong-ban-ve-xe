@@ -9,3 +9,6 @@ backend:
   api:
     base-url: http://localhost:8080/api
 
+app:
+  google-client-id: ${GOOGLE_CLIENT_ID:789219721567-msqsmf12sam42mqi12buvlrng0tfln90.apps.googleusercontent.com}
+
