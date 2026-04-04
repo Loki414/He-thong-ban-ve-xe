@@ -59,7 +59,8 @@ public class HomeController {
     }
 
     @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(Model model) {
+        authModel(model);
         return "admin/dashboard";
     }
 

@@ -15,6 +15,12 @@ async function apiFetch(path) {
   return res.json()
 }
 
+function asUserArray(payload) {
+  if (Array.isArray(payload)) return payload
+  if (payload && Array.isArray(payload.content)) return payload.content
+  return []
+}
+
 // ---- Renderers (can be overridden by dashboard.html) ----
 
 function renderUsers(users) {
@@ -155,9 +161,10 @@ async function loadDashboard() {
   }
 
   try {
-    const [users, buses, trips, tickets, payments, revenueData, bookings30, tripStats] =
+    const [users, userCountRes, buses, trips, tickets, payments, revenueData, bookings30, tripStats] =
       await Promise.allSettled([
-        apiFetch("/users"),
+        apiFetch("/admin/accounts"),
+        apiFetch("/admin/users/count"),
         apiFetch("/buses"),
         apiFetch("/trips"),
         apiFetch("/admin/tickets"),
@@ -169,7 +176,23 @@ async function loadDashboard() {
 
     const ok = p => p.status === "fulfilled" ? p.value : []
 
-    const usersData    = ok(users)
+    let usersData = asUserArray(ok(users))
+    const userKpi = userCountRes.status === "fulfilled" && userCountRes.value != null && typeof userCountRes.value.total === "number"
+      ? userCountRes.value.total
+      : null
+    if (users.status === "rejected" || (userKpi != null && userKpi > 0 && usersData.length === 0)) {
+      for (const p of ["/admin/users", "/users"]) {
+        try {
+          const r = await fetch(`${API}${p}`, { headers: authHeader() })
+          if (!r.ok) continue
+          const next = asUserArray(await r.json())
+          if (next.length > 0) {
+            usersData = next
+            break
+          }
+        } catch (e) { console.warn("Fallback GET " + p + ":", e) }
+      }
+    }
     const busesData    = ok(buses)
     const tripsData    = ok(trips)
     const ticketsData  = ok(tickets)
@@ -177,7 +200,7 @@ async function loadDashboard() {
 
     // KPI
     const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val }
-    setEl("userCount",   usersData.length)
+    setEl("userCount",   userKpi != null ? userKpi : usersData.length)
     setEl("busCount",    busesData.length)
     setEl("tripCount",   tripsData.length)
 

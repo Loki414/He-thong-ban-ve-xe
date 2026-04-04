@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
+    long countByUser_Id(Long userId);
+
     @Override
     @EntityGraph(attributePaths = {"seat", "seat.trip", "seat.trip.bus", "seat.trip.route", "user"})
     List<Ticket> findAll();

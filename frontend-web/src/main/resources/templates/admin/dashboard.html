@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard – BusBooking</title>
@@ -465,8 +465,13 @@
 
 <script src="/js/theme.js"></script>
 <script src="/js/auth-state.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+window.__BUS_API__ = /*[[${apiBase}]]*/ 'http://localhost:8080/api';
+/*]]>*/
+</script>
 <script>
-  const API = "http://localhost:8080/api"
+  const API = window.__BUS_API__ || "http://localhost:8080/api"
 
 // ---- Auth helpers ----
 function authHeader() {
@@ -474,6 +479,13 @@ function authHeader() {
 }
 function authJson() {
   return { ...authHeader(), "Content-Type": "application/json" }
+}
+
+/** Normalize GET users response (array or Spring-style page { content: [...] }). */
+function asUserArray(payload) {
+  if (Array.isArray(payload)) return payload
+  if (payload && Array.isArray(payload.content)) return payload.content
+  return []
 }
 
 // ---- Logout ----
@@ -853,7 +865,7 @@ function renderUsers(users) {
     const actionBtn = isMe
       ? '<span class="text-muted small" title="Không thể xóa chính mình">—</span>'
       : `<button class="btn btn-sm btn-outline-danger px-2 py-0"
-           onclick="openDelModal(${u.id}, '${(u.username||"?").replace(/'/g,"\\'")}', ${isAdmin})"
+           onclick='openDelModal(${u.id}, ${JSON.stringify((u.username && String(u.username).trim()) || (u.email && String(u.email).trim()) || ("#" + u.id))}, ${isAdmin})'
            title="Xóa người dùng">🗑 Xóa</button>`
     return `
       <tr>
@@ -899,10 +911,16 @@ async function confirmDeleteUser() {
   errEl.style.display   = "none"
 
   try {
-    const res = await fetch(`${API}/users/${_pendingDeleteId}`, {
+    let res = await fetch(`${API}/admin/accounts/${_pendingDeleteId}`, {
       method: "DELETE",
       headers: authHeader()
     })
+    if (res.status === 404) {
+      res = await fetch(`${API}/users/${_pendingDeleteId}`, {
+        method: "DELETE",
+        headers: authHeader()
+      })
+    }
     const text = await res.text()
     let payload = null
     try { payload = JSON.parse(text) } catch(e) {}
@@ -927,12 +945,23 @@ async function confirmDeleteUser() {
 
 async function refreshUsers() {
   try {
-    const users = await fetch(`${API}/users`, { headers: authHeader() }).then(r => r.json())
+    let users = []
+    let r = await fetch(`${API}/admin/accounts`, { headers: authHeader() })
+    if (!r.ok) r = await fetch(`${API}/admin/users`, { headers: authHeader() })
+    if (!r.ok) r = await fetch(`${API}/users`, { headers: authHeader() })
+    if (r.ok) users = asUserArray(await r.json())
+
     renderUsers(users)
     const el = document.getElementById("userCount")
-    if (el) el.innerText = users.length
     const badge = document.getElementById("userBadge")
-    if (badge) badge.innerText = users.length + " người"
+    let total = users.length
+    const cr = await fetch(`${API}/admin/users/count`, { headers: authHeader() })
+    if (cr.ok) {
+      const j = await cr.json()
+      if (j && typeof j.total === "number") total = j.total
+    }
+    if (el) el.innerText = total
+    if (badge) badge.innerText = total + " người"
   } catch(e) { console.error(e) }
 }
 
@@ -1191,9 +1220,11 @@ async function loadDashboard() {
     return res.json()
   }
 
-  const [users, buses, routes, trips, tickets, payments, rev, bookings30, tripStats] =
+  const [users, userCountRes, buses, routes, trips, tickets, payments, rev, bookings30, tripStats] =
     await Promise.allSettled([
-      get("/users"), get("/buses"), get("/routes"), get("/trips"),
+      get("/admin/accounts"),
+      get("/admin/users/count"),
+      get("/buses"), get("/routes"), get("/trips"),
       get("/admin/tickets"), get("/payments"),
       get("/admin/revenue/today"),
       get("/admin/bookings/last30days"),
@@ -1202,15 +1233,36 @@ async function loadDashboard() {
 
   const ok = p => p.status === "fulfilled" ? p.value : []
 
+  let usersData = asUserArray(ok(users))
+  const userKpi = userCountRes.status === "fulfilled" && userCountRes.value != null && typeof userCountRes.value.total === "number"
+    ? userCountRes.value.total
+    : null
+
+  if (users.status === "rejected" || (userKpi != null && userKpi > 0 && usersData.length === 0)) {
+    for (const p of ["/admin/users", "/users"]) {
+      try {
+        const r = await fetch(`${API}${p}`, { headers: authHeader() })
+        if (!r.ok) continue
+        const next = asUserArray(await r.json())
+        if (next.length > 0) {
+          usersData = next
+          break
+        }
+      } catch (e) {
+        console.warn("Fallback GET " + p + ":", e)
+      }
+    }
+  }
+
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v }
-  setEl("userCount",  ok(users).length)
+  setEl("userCount", userKpi != null ? userKpi : usersData.length)
   setEl("busCount",   ok(buses).length)
   setEl("tripCount",  ok(trips).length)
 
   const revVal = rev.status === "fulfilled" ? rev.value?.revenue : null
   setEl("revenueToday", revVal != null ? Number(revVal).toLocaleString("vi-VN") + " đ" : "—")
 
-  renderUsers(ok(users))
+  renderUsers(usersData)
   await loadBusTripCounts(ok(buses))
   renderBuses(ok(buses))
   renderRoutes(ok(routes))
