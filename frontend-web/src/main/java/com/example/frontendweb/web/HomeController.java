@@ -108,4 +108,10 @@ public class HomeController {
     public String success() {
         return "success";
     }
+
+    @GetMapping("/my-tickets")
+    public String myTickets(Model model) {
+        authModel(model);
+        return "my-tickets";
+    }
 }

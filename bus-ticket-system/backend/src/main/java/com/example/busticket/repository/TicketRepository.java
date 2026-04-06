@@ -21,5 +21,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @EntityGraph(attributePaths = {"seat", "seat.trip", "seat.trip.bus", "seat.trip.route", "user"})
     Optional<Ticket> findById(Long id);
+
+    @EntityGraph(attributePaths = {"seat", "seat.trip", "seat.trip.bus", "seat.trip.route", "user"})
+    List<Ticket> findByUser_IdOrderByBookingTimeDesc(Long userId);
 }
 

@@ -54,6 +54,14 @@ public class TicketService {
         return ticketRepository.findAll().stream().map(mapperService::toTicketResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<TicketResponse> getMyTickets() {
+        User me = currentUserService.getCurrentUser();
+        return ticketRepository.findByUser_IdOrderByBookingTimeDesc(me.getId()).stream()
+                .map(mapperService::toTicketResponse)
+                .toList();
+    }
+
     @Transactional
     public TicketResponse create(TicketRequest request) {
         seatService.cleanupExpiredLocks();

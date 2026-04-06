@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Vé của tôi – BusBooking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="/">🚌 BusBooking</a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <a href="/trips" class="btn btn-outline-primary btn-sm">Tìm chuyến</a>
+      <span id="themeToggleContainer"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4 py-md-5">
+  <h1 class="h4 fw-bold mb-1">Vé đã đặt</h1>
+  <p class="text-muted small mb-4">Danh sách vé bạn đã đặt trên BusBooking (mới nhất trước).</p>
+
+  <div id="needLogin" class="alert alert-warning" style="display:none">
+    Bạn cần <a href="/login?redirect=/my-tickets">đăng nhập</a> để xem vé đã đặt.
+  </div>
+
+  <div id="loadingState" class="text-center py-5 text-muted">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 small">Đang tải...</p>
+  </div>
+
+  <div id="errorState" class="alert alert-danger" style="display:none"></div>
+
+  <div id="contentArea" style="display:none">
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+      <div class="table-responsive mb-0">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th>Mã vé</th>
+              <th>Tuyến</th>
+              <th>Khởi hành</th>
+              <th>Xe</th>
+              <th>Ghế</th>
+              <th>Giá</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody id="ticketRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <p id="emptyHint" class="text-muted text-center py-4" style="display:none">Bạn chưa có vé nào. <a href="/trips">Đặt vé ngay</a></p>
+  </div>
+</div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+window.__BUS_API__ = /*[[${apiBase}]]*/ 'http://localhost:8080/api';
+/*]]>*/
+</script>
+<script src="/js/theme.js"></script>
+<script src="/js/auth-state.js"></script>
+<script>
+(function () {
+  const API = window.__BUS_API__ || 'http://localhost:8080/api'
+
+  function authHeader() {
+    return { 'Authorization': 'Bearer ' + (AuthState.getToken() || '') }
+  }
+
+  function formatDep(raw) {
+    if (!raw) return '—'
+    if (typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(raw)) {
+      const d = new Date(raw)
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString('vi-VN', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        })
+      }
+    }
+    try {
+      const v = typeof raw === 'string' ? JSON.parse(raw) : raw
+      const d = Array.isArray(v)
+        ? new Date(v[0], v[1] - 1, v[2], v[3] || 0, v[4] || 0)
+        : new Date(v)
+      return d.toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    } catch {
+      return String(raw)
+    }
+  }
+
+  function formatBookedAt(raw) {
+    if (!raw) return '—'
+    try {
+      const d = new Date(raw)
+      if (isNaN(d.getTime())) return String(raw)
+      return d.toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    } catch {
+      return String(raw)
+    }
+  }
+
+  const statusLabels = {
+    PENDING: { text: 'Chờ thanh toán', cls: 'warning' },
+    CONFIRMED: { text: 'Đã xác nhận', cls: 'success' },
+    CANCELLED: { text: 'Đã hủy', cls: 'secondary' }
+  }
+
+  function statusBadge(status) {
+    const s = statusLabels[status] || { text: status || '—', cls: 'secondary' }
+    return `<span class="badge bg-${s.cls}">${s.text}</span>`
+  }
+
+  async function load() {
+    const token = AuthState.getToken()
+    if (!token) {
+      document.getElementById('loadingState').style.display = 'none'
+      document.getElementById('needLogin').style.display = 'block'
+      return
+    }
+
+    try {
+      const res = await fetch(`${API}/tickets/mine`, { headers: authHeader() })
+      const text = await res.text()
+      let data = null
+      try { data = JSON.parse(text) } catch (e) {}
+
+      document.getElementById('loadingState').style.display = 'none'
+
+      if (res.status === 401) {
+        document.getElementById('needLogin').style.display = 'block'
+        return
+      }
+
+      if (!res.ok) {
+        document.getElementById('errorState').style.display = 'block'
+        document.getElementById('errorState').textContent =
+          (data && data.message) || ('Không tải được danh sách vé (' + res.status + ')')
+        return
+      }
+
+      if (!Array.isArray(data)) {
+        document.getElementById('errorState').style.display = 'block'
+        document.getElementById('errorState').textContent = 'Dữ liệu không hợp lệ.'
+        return
+      }
+
+      document.getElementById('contentArea').style.display = 'block'
+      const tbody = document.getElementById('ticketRows')
+      const empty = document.getElementById('emptyHint')
+
+      if (data.length === 0) {
+        empty.style.display = 'block'
+        tbody.innerHTML = ''
+        return
+      }
+
+      empty.style.display = 'none'
+      tbody.innerHTML = data.map(t => {
+        const route = t.trip && t.trip.route
+          ? `${t.trip.route.origin || '—'} → ${t.trip.route.destination || '—'}`
+          : '—'
+        const dep = t.trip ? formatDep(t.trip.departureTime) : '—'
+        const bus = t.trip && t.trip.bus
+          ? `${t.trip.bus.busNumber || ''} · ${t.trip.bus.busType || ''}`.trim()
+          : '—'
+        const seat = t.seat && t.seat.seatNumber ? t.seat.seatNumber : '—'
+        const price = t.price != null
+          ? Number(t.price).toLocaleString('vi-VN') + ' đ'
+          : '—'
+        return `
+          <tr>
+            <td class="text-muted">#${t.id}</td>
+            <td>${route}</td>
+            <td>${dep}<div class="text-muted" style="font-size:.72rem">Đặt: ${formatBookedAt(t.bookingTime)}</div></td>
+            <td>${bus}</td>
+            <td><strong class="text-warning">${seat}</strong></td>
+            <td class="fw-semibold">${price}</td>
+            <td>${statusBadge(t.status)}</td>
+          </tr>`
+      }).join('')
+    } catch (e) {
+      document.getElementById('loadingState').style.display = 'none'
+      document.getElementById('errorState').style.display = 'block'
+      document.getElementById('errorState').textContent = 'Lỗi kết nối: ' + e.message
+    }
+  }
+
+  load()
+})()
+</script>
+</body>
+</html>

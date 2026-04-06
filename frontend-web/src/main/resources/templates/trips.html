@@ -292,6 +292,7 @@
     if (token && username) {
       area.innerHTML = `
         <span class="small text-muted d-none d-md-inline">Xin chào, <strong>${username}</strong></span>
+        <a href="/my-tickets" class="btn btn-outline-primary btn-sm">Vé của tôi</a>
         ${role === "ROLE_ADMIN" ? '<a href="/admin/dashboard" class="btn btn-outline-secondary btn-sm">Admin</a>' : ""}
         <button class="btn btn-outline-danger btn-sm" onclick="doLogout()">Đăng xuất</button>`
     } else {
